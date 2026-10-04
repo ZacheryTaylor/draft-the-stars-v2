@@ -8,6 +8,17 @@ Fantasy drafts for any reality competition: draft the cast, score every episode,
 - **Show-agnostic:** no show logos or photos (monogram avatars only), "fan-made, not affiliated" footer, generic schema (a *unit* is whatever scores together: a DWTS couple, or a single contestant).
 - **Look:** carried over from the live redesign (script headings, podium, gold border on #1, Alive meter fill, week names), now driven by per-user theme tokens.
 
+## Live demo (GitHub Pages)
+
+**https://zacherytaylor.github.io/draft-the-stars-v2/** · a static, browser-only demo: test data, no real payments, nothing leaves your browser.
+
+- Log in: **Log in** → username `zach` (no password) → My leagues. Other demo accounts: `foxtrot_fran` (fee covered by Zach), `waltz_wren` (unpaid), `tango_tess`.
+- Leagues: *Sunday Night Ballroom* (drafted, mid-season), *Office Watch Party* (draft not started: mixed paid / covered / unpaid / open slots), and a read-only **girls' league sample** (the v1 league migrated, fee-waived).
+- Theme: the **Theme** menu in the header switches between all 8 presets on any page (also Settings).
+- **Reset demo** (top banner) restores the seed data.
+
+How it works: `npm run build:demo` (scripts/build-demo.mjs) swaps `src/demo-app` in as the app and runs a Next.js static export with `basePath=/draft-the-stars-v2`. Pages and the server app share the same views (`src/views`), and the demo runs the same `MockAdapter` in the browser, persisted to localStorage (`src/demo`). Deployed by `.github/workflows/pages.yml`. League pages use `?slug=` (`/league/fees/?slug=office-party`) so leagues created in the browser work without prebuilt pages.
+
 ## What's built
 
 | Area | Where |
@@ -23,7 +34,7 @@ Fantasy drafts for any reality competition: draft the cast, score every episode,
 | Mock data layer behind a `DataAdapter` interface | `src/lib/data/` |
 | Girls' league migration stub + 0-difference verification | `src/lib/migration/` · `scripts/migrate-legacy-league.ts` · `tests/migration.test.ts` |
 | Pages: landing, sign up, log in, dashboard, create league, join by code, league standings + weekly scores, draft room, commissioner tools (invite, draft order, score fixes), league fees / payment roster, settings (username + theme picker) | `src/app/` |
-| CI: lint, typecheck, tests, migration dry-run, build | `.github/workflows/ci.yml` |
+| CI: lint, typecheck, tests, migration dry-run, build, demo export; Pages deploy | `.github/workflows/ci.yml` · `.github/workflows/pages.yml` |
 
 ## Local setup
 

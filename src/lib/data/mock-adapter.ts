@@ -17,6 +17,10 @@ export function mockDb(): DbState {
 export function resetMockDb(): void {
   g.__dtsMockDb = createSeedState();
 }
+/** Browser demo: hydrate the store from localStorage (or a fresh demo seed). */
+export function setMockDb(state: DbState): void {
+  g.__dtsMockDb = state;
+}
 
 const now = () => new Date().toISOString();
 const rid = (p: string) => `${p}:${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
@@ -61,8 +65,12 @@ export class MockAdapter implements DataAdapter {
     return mockDb();
   }
 
-  async getProfile(id: string) {
+  /** Sync readers (the browser demo renders from these; the async interface wraps them). */
+  getProfileNow(id: string) {
     return this.db.profiles.find((p) => p.id === id) ?? null;
+  }
+  async getProfile(id: string) {
+    return this.getProfileNow(id);
   }
   async findProfileByLogin(login: string) {
     const l = login.trim().toLowerCase();
@@ -103,9 +111,15 @@ export class MockAdapter implements DataAdapter {
     return p;
   }
   async listSeasons() {
+    return this.listSeasonsNow();
+  }
+  listSeasonsNow() {
     return this.db.seasons.map((season) => ({ season, show: this.db.shows.find((s) => s.id === season.showId)!, castUnits: this.db.units.filter((u) => u.seasonId === season.id).length }));
   }
   async listLeaguesForUser(userId: string): Promise<LeagueSummary[]> {
+    return this.listLeaguesForUserNow(userId);
+  }
+  listLeaguesForUserNow(userId: string): LeagueSummary[] {
     const db = this.db;
     return db.leagueMembers
       .filter((m) => m.userId === userId)
@@ -128,6 +142,9 @@ export class MockAdapter implements DataAdapter {
       });
   }
   async getLeague(slug: string): Promise<LeagueBundle | null> {
+    return this.getLeagueNow(slug);
+  }
+  getLeagueNow(slug: string): LeagueBundle | null {
     const db = this.db;
     const l = db.leagues.find((x) => x.slug === slug);
     if (!l) return null;

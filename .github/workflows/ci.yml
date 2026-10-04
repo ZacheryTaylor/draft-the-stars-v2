@@ -36,3 +36,5 @@ jobs:
         run: npm run migrate:dry-run
       - name: Build
         run: npm run build
+      - name: Build static demo (GitHub Pages export)
+        run: npm run build:demo
