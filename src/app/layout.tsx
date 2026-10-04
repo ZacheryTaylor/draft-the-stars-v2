@@ -72,7 +72,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <footer>
           Fan-made and not affiliated with any show, network or production company. No logos or photos: monograms only.
           <br />
-          Accounts are free · leagues are $3 per member · Draft the Stars v2 preview (mock data, placeholder services)
+          Free accounts · free to create a league · $5 platform fee per member (no prizes or payouts) · Draft the Stars v2 preview (mock data, placeholder services)
         </footer>
       </body>
     </html>

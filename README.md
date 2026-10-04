@@ -15,12 +15,14 @@ Fantasy drafts for any reality competition: draft the cast, score every episode,
 | Scoring engine: typed, pure port of the live `js/scoring.js`, **bit-for-bit identical** | `src/lib/scoring/` · `tests/scoring.test.ts` |
 | League size and roster logic (copies, per-team roster, leftovers by team count) | `src/lib/league/sizing.ts` · `tests/league-sizing.test.ts` |
 | Draft rules (snake order, roster slots per role, copies, no dancer twice per team) | `src/lib/league/draft.ts` |
-| Billing placeholder: $3 per member at league creation, mock checkout, Stripe adapter stub | `src/lib/billing/` · `tests/billing.test.ts` |
+| Fees placeholder: free league creation, $5 platform fee per member slot, commissioner can cover any slots in one mock checkout, draft gated on filled + paid | `src/lib/billing/` · `tests/billing.test.ts` |
+| Draft order: seeded randomize (re-roll, audit log) or manual drag/keyboard reorder, locks at draft start | `src/lib/league/draft-order.ts` · `tests/draft-order.test.ts` |
+| Per-league commissioner score fixes (never touch shared scores) | `league_score_overrides` · `tests/draft-order.test.ts`, `tests/sql.test.ts` |
 | Theme presets as CSS-variable design tokens, WCAG AA check for every preset | `src/lib/themes/` · `tests/themes.test.ts` |
 | Supabase migrations (schema, billing, future tables, RLS, join-by-code RPC) + DWTS S35 seed | `supabase/` · `tests/sql.test.ts` (runs in PGlite) |
 | Mock data layer behind a `DataAdapter` interface | `src/lib/data/` |
 | Girls' league migration stub + 0-difference verification | `src/lib/migration/` · `scripts/migrate-legacy-league.ts` · `tests/migration.test.ts` |
-| Pages: landing, sign up, log in, dashboard, create league, join by code, league standings + weekly scores, draft room, commissioner tools, billing, settings (username + theme picker) | `src/app/` |
+| Pages: landing, sign up, log in, dashboard, create league, join by code, league standings + weekly scores, draft room, commissioner tools (invite, draft order, score fixes), league fees / payment roster, settings (username + theme picker) | `src/app/` |
 | CI: lint, typecheck, tests, migration dry-run, build | `.github/workflows/ci.yml` |
 
 ## Local setup
@@ -55,7 +57,7 @@ All optional today; see `.env.example`.
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase | Browser/server client (RLS applies) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase | Server only: score ingestion, payment webhooks, league activation |
 | `SUPABASE_DB_URL` | Supabase | Migrations and the league import |
-| `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_LEAGUE_MEMBER` | Stripe | League checkout + webhook |
+| `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_LEAGUE_MEMBER` | Stripe | Member-fee checkout (quantity = slots) + webhook |
 | `RESEND_API_KEY`, `EMAIL_FROM` | Resend | Verification, reset, invites, reminders (also Supabase Auth SMTP) |
 | `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` | Sentry | Error reporting + source maps |
 
@@ -72,13 +74,16 @@ Nothing below has an account, key or connection. Each is a stub you can swap for
 | **Vercel** | Not deployed | Vercel Pro (Hobby is non-commercial only) | set all of the above in project settings | none |
 | **Domain** | none | A .com (plan suggests buying before Nov 1) | `NEXT_PUBLIC_SITE_URL`, `EMAIL_FROM` | none |
 
-## Billing model (placeholder)
+## Fees model (placeholder)
 
-- Creating an **account is free**. **Creating a league triggers payment:** the creator picks 3 to 12 teams/members and pays **$3 per member ($9 to $36)**.
-- The league is created as `pending_payment` (billing `pending`) and becomes `active` only when checkout succeeds. **Today only the mock provider can do that.**
-- While pending, the league page, settings and checkout work, but the draft room, invite codes/joining and picks are locked.
-- Config: `src/lib/billing/config.ts` (`pricePerMemberCents = 300`). **Single enforcement setting:** `enforcement = "at_creation"` (current) or `"off"` (leagues active immediately). It is read in one place, `leagueGate()` in `src/lib/billing/index.ts`.
-- DB: `league_billing` (status, price, billed member count, amount due), `payments`, `entitlements` (a paid league gets a `league_season_pass`). Only the service role can activate a league or change its team count (trigger `protect_league_billing_fields`); RLS gives members read-only access to billing.
+- **Free accounts. Creating a league is free** (leagues start `active`). The commissioner picks 3 to 12 member slots and invites members.
+- **Each member pays only their own one-time $5 platform fee** (`pricePerMemberCents = 500`), the commissioner included. Copy everywhere: it is a platform fee only; **no prizes or payouts** are paid from fees.
+- **The commissioner can cover any number of other slots, or all of them, in ONE mock checkout (quantity × $5)** from the payment roster: multi-select + **Pay for selected**, or **Pay for all unpaid**. Covered slots count as paid. Covering works on **open, unfilled slots** too: they stay paid for whoever claims them. Any collecting back from members happens **off-platform**.
+- One `payments` row per **team slot**: `member_id` (who holds it, null while open) is recorded separately from `payer_id` (who paid), so the roster shows **"Covered by <commissioner>"**. A partial unique index (`payments_one_active_per_slot`) plus `mark_slots_paid()` (all-or-nothing, only `unpaid` rows) make **double payment impossible**; the app mirrors it in `planCheckout()` and the mock adapter. Already-paid checkboxes are disabled in the UI.
+- **Draft gate (single setting `billing.draftGate`):** the draft can't start until **every slot is filled AND paid/covered (or waived)**. Enforced in the UI (Start disabled + reasons), the server (`draftReadiness()` in `setDraftStatus`), and the DB (`league_draft_ready()` + trigger on `leagues.draft_status`).
+- Placeholders: **Remind** (email stub) for unpaid members; **Refund** (back to **whoever paid**: `refund_to_id = payer_id`, status `refund_pending`, slot becomes unpaid again); **Remove member** before the draft (self-paid → refund to them and the slot reopens unpaid; covered → the slot stays covered for the next member). League cancellation would refund every paid slot to its payer (TODO(refunds)).
+- Only the server can mark a slot paid: the mock checkout today, a verified Stripe webhook later (`mark_slots_paid` is not executable by `authenticated`; there is no update policy on `payments`). Each paid slot grants a `league_membership` entitlement.
+- The migrated girls' league is **fee-waived** (`league_billing.fee_waived`, slots created as `waived`).
 
 ## League size and roster logic
 
@@ -94,7 +99,7 @@ Pure function `leagueSizing(castUnits, teams)` in `src/lib/league/sizing.ts`, dr
 | Copies | 1 | 1 | 2 | 2 | 2 | 2 | 3 | 3 | 3 | 3 |
 | Per team (celebs/pros) | 10 (5/5) | 8 (4/4) | 12 (6/6) | 10 (5/5) | 8 (4/4) | 8 (4/4) | 10 (5/5) | 8 (4/4) | 8 (4/4) | 8 (4/4) |
 | Left over | 2 | 0 | 4 | 4 | 8 | 0 | 6 | 16 | 8 | 0 |
-| Price | $9 | $12 | $15 | $18 | $21 | $24 | $27 | $30 | $33 | $36 |
+| Fees if all covered ($5 each) | $15 | $20 | $25 | $30 | $35 | $40 | $45 | $50 | $55 | $60 |
 
 The girls' league (8 teams, 2 copies, 8 per team, 4 pros + 4 celebrities) matches this exactly (tested).
 
@@ -125,8 +130,8 @@ Every preset passes WCAG AA for 14 text pairs (4.5:1) and 3 large-text/UI pairs 
 
 `supabase/migrations`:
 
-1. `…000100_core_schema.sql`: `profiles` (unique lowercase username, 13+ trigger, `theme_preset`, email stays in `auth.users`), `shows`, `scoring_templates`, `seasons`, `contestant_units`, `contestants` (monogram, no photos), `episodes` (round value, units competing), `scores` + `score_audit_log`, `leagues` (unique slug, `settings` JSON, `status`), `league_members` (commissioner / co_commissioner / player), `teams`, `picks`, `draft_sessions`, `invites` (codes), `standings_cache`.
-2. `…000200_billing_and_future.sql`: `league_billing`, `payments`, `entitlements`, plus empty future tables `cosmetics`, `user_cosmetics`, `badges`, `user_badges`, `side_contests`, `sponsors`; league bootstrap trigger.
+1. `…000100_core_schema.sql`: `profiles` (unique lowercase username, 13+ trigger, `theme_preset`, email stays in `auth.users`), `shows`, `scoring_templates`, `seasons`, `contestant_units`, `contestants` (monogram, no photos), `episodes` (round value, units competing), `scores` + `score_audit_log`, `leagues` (unique slug, `settings` JSON, `status` active/cancelled/archived), `league_members` (commissioner / co_commissioner / player), `teams` (deferrable unique draft position), `picks`, `draft_order_log` (seed + input + order per roll), `league_score_overrides` (per-league score fixes), `draft_sessions`, `invites` (codes), `standings_cache`.
+2. `…000200_billing_and_future.sql`: `league_billing` (price, fee waiver), `payments` (one per slot: member_id, payer_id, status, checkout_id, refund_to_id), `entitlements`, plus empty future tables `cosmetics`, `user_cosmetics`, `badges`, `user_badges`, `side_contests`, `sponsors`; triggers for league/team bootstrap, slot-member sync, the draft gate, draft-order lock and team-field protection; `mark_slots_paid()` and `league_draft_ready()`.
 3. `…000300_rls.sql`: RLS on every table, `is_league_member` / `is_league_commissioner` helpers, `join_league_by_code()` RPC.
 
 `supabase/seed.sql` (generated) seeds DWTS Season 35 (16 couples, 32 contestants, 11 episodes, weeks 1 to 3 scores) and the scoring template. `tests/sql.test.ts` applies everything to PGlite (Postgres in WASM, with a small Supabase shim in `supabase/tests/`) and checks constraints and RLS.
@@ -137,4 +142,4 @@ Every preset passes WCAG AA for 14 text pairs (4.5:1) and 3 large-text/UI pairs 
 
 ## Open TODOs
 
-`TODO(supabase)`, `TODO(supabase-auth)`, `TODO(realtime)`, `TODO(stripe)`, `TODO(resend)`, `TODO(sentry)`, `TODO(billing-enforcement)`, `TODO(free-agents)`, `TODO(migration)`: grep the code for each. Also: commissioner score overrides should become a per-league override table (shared scores are service-role only in RLS), the standings_cache rebuild job, and score ingestion (port `scripts/auto-score.mjs` from v1).
+`TODO(supabase)`, `TODO(supabase-auth)`, `TODO(realtime)`, `TODO(stripe)`, `TODO(resend)`, `TODO(sentry)`, `TODO(billing-enforcement)`, `TODO(refunds)`, `TODO(cleanup)`, `TODO(free-agents)`, `TODO(migration)`: grep the code for each. `TODO(cleanup)`: a scheduled job to archive leagues that never filled/paid their slots. Also: the standings_cache rebuild job (applying `league_score_overrides`), and score ingestion (port `scripts/auto-score.mjs` from v1).

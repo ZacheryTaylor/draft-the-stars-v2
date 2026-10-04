@@ -19,6 +19,7 @@ describe("girls' league migration (dry run)", () => {
     expect(plan.seasonBundle.contestants).toHaveLength(32);
     expect(plan.league.settings).toMatchObject({ teamCount: 8, copiesPerContestant: 2, rosterSize: { celebrity: 4, pro: 4 } });
     expect(plan.league.status).toBe("active");
+    expect(plan.billing).toMatchObject({ feeWaived: true, pricePerMemberCents: 500 }); // girls' league stays fee-waived
   });
   it("recomputed standings = backup with 0 differences", () => {
     const r = verifyMigration(plan, data, current);

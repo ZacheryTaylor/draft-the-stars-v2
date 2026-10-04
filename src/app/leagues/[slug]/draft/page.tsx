@@ -1,7 +1,8 @@
 import { getCurrentUser } from "@/lib/auth/session";
 import { getData } from "@/lib/data";
 import { viewerRole } from "@/lib/data/league-view";
-import { leagueGate } from "@/lib/billing";
+import Link from "next/link";
+import { draftReadiness } from "@/lib/billing";
 import { checkPick, teamForPick, totalPicks } from "@/lib/league/draft";
 import { leagueSizing } from "@/lib/league/sizing";
 import { makePick, setDraftStatus } from "../../../actions";
@@ -26,7 +27,8 @@ export default async function DraftRoom({ params, searchParams }: { params: Prom
   const live = league.draftStatus === "in_progress";
   const onClock = made < total ? teamForPick(made + 1, teams, rules.draftType) : null;
   const canPickNow = live && onClock && (v.isCommissioner || onClock.ownerId === user?.id);
-  const gate = leagueGate(league.status);
+  const ready = draftReadiness({ teamCount: league.settings.teamCount, teams: b.teams, payments: b.payments });
+  const blocked = league.draftStatus === "not_started" && !ready.ready;
   const sizing = leagueSizing(b.units.length, teams.length);
   const perTeam = Object.values(rules.rosterSize).reduce<number>((a, c) => a + (c ?? 0), 0);
   const byId = new Map(b.contestants.map((c) => [c.id, c]));
@@ -47,12 +49,12 @@ export default async function DraftRoom({ params, searchParams }: { params: Prom
           {v.isCommissioner && league.draftStatus !== "complete" && (
             <form action={setDraftStatus} className="row">
               <input type="hidden" name="slug" value={slug} />
-              {live ? <button name="status" value="paused">Pause draft</button> : <button className="primary" name="status" value="in_progress" disabled={!gate.allowed}>{league.draftStatus === "paused" ? "Resume draft" : "Start draft"}</button>}
+              {live ? <button name="status" value="paused">Pause draft</button> : <button className="primary" name="status" value="in_progress" disabled={blocked}>{league.draftStatus === "paused" ? "Resume draft" : "Start draft"}</button>}
             </form>
           )}
         </div>
         <FormMessage error={error} />
-        {!gate.allowed && <p className="notice warn"><b>Locked:</b> {gate.message}</p>}
+        {blocked && <p className="notice warn"><b>Draft waiting:</b> {ready.reasons.join("; ")}. The draft starts once every slot is filled and paid. <Link href={`/leagues/${slug}/billing`}>See the payment roster</Link></p>}
         <p className="hint">Live updates use page refresh for now. Supabase Realtime (websockets, draft room only) is a placeholder.</p>
       </div>
 

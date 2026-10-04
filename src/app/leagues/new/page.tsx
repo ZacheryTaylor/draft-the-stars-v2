@@ -23,7 +23,7 @@ export default async function NewLeaguePage({ searchParams }: { searchParams: Pr
     <section className="card">
       <p className="eyebrow">New league · you will be commissioner</p>
       <h2>Create a league</h2>
-      <p className="muted">Pick how many teams (3 to 12). Copies per dancer and roster size follow from the cast size, and the league costs $3 per member.</p>
+      <p className="muted">Pick how many teams (3 to 12). Copies per dancer and roster size follow from the cast size, Creating a league is free; each member pays a $5 platform fee.</p>
       <FormMessage error={error} />
       <CreateLeagueForm seasons={options} action={createLeague} providerConnected={realProvider().isConnected()} />
     </section>

@@ -26,6 +26,8 @@ alter table public.league_members enable row level security;
 alter table public.teams enable row level security;
 alter table public.picks enable row level security;
 alter table public.draft_sessions enable row level security;
+alter table public.draft_order_log enable row level security;
+alter table public.league_score_overrides enable row level security;
 alter table public.invites enable row level security;
 alter table public.standings_cache enable row level security;
 alter table public.league_billing enable row level security;
@@ -110,10 +112,21 @@ create policy invites_delete on public.invites for delete to authenticated using
 create policy standings_select on public.standings_cache for select to anon, authenticated
   using (public.is_league_member(league_id) or exists (select 1 from public.leagues l where l.id = league_id and l.privacy = 'public'));
 
--- billing: members can see status; only the server (service role, after the provider confirms) writes.
+-- billing: members see fee settings and the slot payment roster (paid/unpaid, covered by whom).
+-- No insert/update/delete policies: only the server (service role via mark_slots_paid) writes payments.
 create policy billing_select on public.league_billing for select to authenticated using (public.is_league_member(league_id));
-create policy payments_select on public.payments for select to authenticated
-  using (payer_id = (select auth.uid()) or public.is_league_commissioner(league_id));
+create policy payments_select on public.payments for select to authenticated using (public.is_league_member(league_id));
+
+-- draft order: members read the audit log; commissioners add entries (and reorder teams via teams_update).
+create policy draft_order_select on public.draft_order_log for select to authenticated using (public.is_league_member(league_id));
+create policy draft_order_insert on public.draft_order_log for insert to authenticated with check (public.is_league_commissioner(league_id));
+
+-- per-league score overrides: commissioners write, members read. Shared public.scores stay service-role only.
+create policy overrides_select on public.league_score_overrides for select to authenticated using (public.is_league_member(league_id));
+create policy overrides_insert on public.league_score_overrides for insert to authenticated with check (public.is_league_commissioner(league_id));
+create policy overrides_update on public.league_score_overrides for update to authenticated
+  using (public.is_league_commissioner(league_id)) with check (public.is_league_commissioner(league_id));
+create policy overrides_delete on public.league_score_overrides for delete to authenticated using (public.is_league_commissioner(league_id));
 create policy entitlements_select on public.entitlements for select to authenticated
   using (user_id = (select auth.uid()) or (league_id is not null and public.is_league_member(league_id)));
 
@@ -139,16 +152,25 @@ begin
      and (max_uses is null or uses < max_uses)
    for update;
   if not found then raise exception 'Invite code is invalid or expired'; end if;
-  if not exists (select 1 from public.leagues where id = v_invite.league_id and status = 'active') then
-    raise exception 'This league is waiting for payment';
+  if not exists (select 1 from public.leagues where id = v_invite.league_id and status = 'active' and draft_status = 'not_started') then
+    raise exception 'This league is not accepting members';
+  end if;
+  if exists (select 1 from public.league_members where league_id = v_invite.league_id and user_id = v_uid) then
+    return v_invite.league_id;
+  end if;
+  if (select count(*) from public.league_members where league_id = v_invite.league_id)
+       >= (select (settings ->> 'team_count')::int from public.leagues where id = v_invite.league_id) then
+    raise exception 'This league is full';
   end if;
 
   insert into public.league_members (league_id, user_id, role) values (v_invite.league_id, v_uid, 'player')
     on conflict (league_id, user_id) do nothing;
   update public.invites set uses = uses + 1 where id = v_invite.id;
-  if v_invite.claim_team_id is not null then
-    update public.teams set owner_id = v_uid where id = v_invite.claim_team_id and owner_id is null;
-  end if;
+  -- claim the invite's team, else the first open slot (its payment row follows via sync_slot_member)
+  update public.teams set owner_id = v_uid
+   where id = coalesce(v_invite.claim_team_id,
+                       (select id from public.teams where league_id = v_invite.league_id and owner_id is null order by draft_position limit 1))
+     and owner_id is null;
   return v_invite.league_id;
 end $$;
 revoke execute on function public.join_league_by_code(text) from public, anon;

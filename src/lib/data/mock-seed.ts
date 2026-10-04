@@ -1,9 +1,10 @@
 /** Demo data for the mock adapter. Synthetic users/leagues; real DWTS S35 show data from src/data/seasons. */
 import seasonFile from "@/data/seasons/dwts-s35.json";
 import { seasonBundleFromFile, type SeasonFile } from "./season-file";
-import type { Contestant, DbState, Pick, Profile, Team } from "./types";
+import type { Contestant, DbState, Pick, Profile, SlotPayment, Team } from "./types";
 import { billing } from "@/lib/billing/config";
 import { leagueSizing } from "@/lib/league/sizing";
+import { manualEntry, positionsFor, randomizeEntry } from "@/lib/league/draft-order";
 
 const T0 = "2026-09-01T00:00:00.000Z";
 
@@ -54,11 +55,27 @@ export function createSeedState(): DbState {
   const teams1: Team[] = teamNames.map((name, i) => ({ id: `${L1}:team:${i + 1}`, leagueId: L1, ownerId: owners[i], name, draftPosition: i + 1 }));
   const picks1 = demoDraft(L1, teams1, sb.contestants, { celebrity: 4, pro: 4 }, 2);
 
-  // League 2: draft not started.
+  // League 2: draft not started; a mix of paid, covered, unpaid and open slots.
   const L2 = "league:office-party";
-  const teams2: Team[] = ["Commish Crew", "Desk Dancers", "Open Team 3", "Open Team 4", "Open Team 5", "Open Team 6"].map((name, i) => ({
-    id: `${L2}:team:${i + 1}`, leagueId: L2, ownerId: ["user:zach", "user:p3", null, null, null, null][i], name, draftPosition: i + 1,
+  const owners2 = ["user:zach", "user:p3", "user:p4", null, "user:p6", null];
+  const teams2: Team[] = ["Commish Crew", "Desk Dancers", "Spreadsheet Shimmy", "Open Team 4", "Cubicle Cha Cha", "Open Team 6"].map((name, i) => ({
+    id: `${L2}:team:${i + 1}`, leagueId: L2, ownerId: owners2[i], name, draftPosition: i + 1,
   }));
+  const order2 = randomizeEntry(teams2.map((t) => t.id), "office-party-1-demo", 1, "user:zach", T0);
+  const pos2 = positionsFor(order2.order);
+  teams2.forEach((t) => (t.draftPosition = pos2[t.id]));
+  teams2.sort((a, b) => a.draftPosition - b.draftPosition);
+
+  const slot = (leagueId: string, teamId: string, memberId: string | null, payerId: string | null, n: number): SlotPayment => ({
+    id: `payment:${teamId}`, leagueId, teamId, memberId, payerId, amountCents: billing.pricePerMemberCents, currency: billing.currency,
+    status: payerId ? "paid" : "unpaid", provider: payerId ? "mock" : null, checkoutId: payerId ? `chk_seed_${n}` : null,
+    providerPaymentId: payerId ? `mock_seed_${n}` : null, paidAt: payerId ? T0 : null, remindedAt: null, refundToId: null, createdAt: T0,
+  });
+  // L1: everyone paid; Zach covered Jo and Wren in one checkout.
+  const payments1 = teams1.map((t, i) => slot(L1, t.id, t.ownerId, i >= 6 ? "user:zach" : t.ownerId, i >= 6 ? 99 : i + 1));
+  // L2: Quinn paid; Zach covered Fran + open slot 4 in one checkout; Zach's own, Wren's and slot 6 unpaid.
+  const payer2: Record<string, string | null> = { [`${L2}:team:2`]: "user:p3", [`${L2}:team:3`]: "user:zach", [`${L2}:team:4`]: "user:zach" };
+  const payments2 = teams2.map((t) => slot(L2, t.id, t.ownerId, payer2[t.id] ?? null, payer2[t.id] === "user:zach" ? 50 : 51));
 
   const settingsFor = (teamCount: number) => {
     const s = leagueSizing(sb.units.length, teamCount);
@@ -75,28 +92,30 @@ export function createSeedState(): DbState {
     scores: sb.scores,
     leagues: [
       { id: L1, slug: "demo-ballroom", name: "Sunday Night Ballroom", seasonId: sb.season.id, scoringTemplateSlug: sb.season.scoringTemplateSlug, ownerId: "user:zach", settings, privacy: "private", status: "active", draftStatus: "complete", createdAt: T0 },
-      { id: L2, slug: "office-party", name: "Office Watch Party", seasonId: sb.season.id, scoringTemplateSlug: sb.season.scoringTemplateSlug, ownerId: "user:zach", settings: settingsFor(6), privacy: "private", status: "pending_payment", draftStatus: "not_started", createdAt: T0 },
+      { id: L2, slug: "office-party", name: "Office Watch Party", seasonId: sb.season.id, scoringTemplateSlug: sb.season.scoringTemplateSlug, ownerId: "user:zach", settings: settingsFor(6), privacy: "private", status: "active", draftStatus: "not_started", createdAt: T0 },
     ],
     leagueMembers: [
       ...owners.map((userId, i) => ({ leagueId: L1, userId, role: i === 0 ? ("commissioner" as const) : ("player" as const), joinedAt: T0 })),
       { leagueId: L2, userId: "user:zach", role: "commissioner", joinedAt: T0 },
       { leagueId: L2, userId: "user:p3", role: "player", joinedAt: T0 },
+      { leagueId: L2, userId: "user:p4", role: "player", joinedAt: T0 },
+      { leagueId: L2, userId: "user:p6", role: "player", joinedAt: T0 },
     ],
     teams: [...teams1, ...teams2],
     picks: picks1,
     invites: [
       { id: "invite:1", leagueId: L1, code: "BALLROOM", createdBy: "user:zach", expiresAt: null, maxUses: null, uses: 7, claimTeamId: null, revoked: false },
-      { id: "invite:2", leagueId: L2, code: "OFFICE35", createdBy: "user:zach", expiresAt: null, maxUses: null, uses: 1, claimTeamId: null, revoked: false },
+      { id: "invite:2", leagueId: L2, code: "OFFICE35", createdBy: "user:zach", expiresAt: null, maxUses: null, uses: 3, claimTeamId: null, revoked: false },
     ],
-    leagueBilling: [
-      { leagueId: L1, status: "active", pricePerMemberCents: billing.pricePerMemberCents, billedMemberCount: 8, amountDueCents: 2400, provider: "mock", paidAt: T0 },
-      { leagueId: L2, status: "pending", pricePerMemberCents: billing.pricePerMemberCents, billedMemberCount: 6, amountDueCents: 1800, provider: null, paidAt: null },
+    leagueBilling: [L1, L2].map((leagueId) => ({ leagueId, pricePerMemberCents: billing.pricePerMemberCents, feeWaived: false, waivedReason: null })),
+    payments: [...payments1, ...payments2],
+    entitlements: [...payments1, ...payments2]
+      .filter((p) => p.status === "paid")
+      .map((p) => ({ id: `ent:${p.id}`, userId: p.memberId, leagueId: p.leagueId, kind: "league_membership" as const, sourcePaymentId: p.id, startsAt: T0, endsAt: null })),
+    draftOrderLog: [
+      { id: "order:l1", leagueId: L1, ...manualEntry(teams1.map((t) => t.id), 1, "user:zach", T0) },
+      { id: "order:l2", leagueId: L2, ...order2 },
     ],
-    payments: [
-      { id: "payment:seed-1", leagueId: L1, payerId: "user:zach", provider: "mock", providerPaymentId: "mock_seed_1", amountCents: 2400, currency: "usd", memberCount: 8, pricePerMemberCents: 300, status: "succeeded", createdAt: T0 },
-    ],
-    entitlements: [
-      { id: "ent:seed-1", userId: null, leagueId: L1, kind: "league_season_pass", sourcePaymentId: "payment:seed-1", startsAt: T0, endsAt: null },
-    ],
+    scoreOverrides: [],
   };
 }

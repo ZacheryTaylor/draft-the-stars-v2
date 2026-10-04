@@ -166,11 +166,11 @@ create table public.leagues (
   season_id uuid not null references public.seasons (id),
   scoring_template_id uuid not null references public.scoring_templates (id),
   owner_id uuid not null references public.profiles (id),
-  -- team_count (3-12) is also the billed member count; copies and roster come from src/lib/league/sizing.ts
+  -- team_count (3-12) = member slots, set by the commissioner; copies and roster come from src/lib/league/sizing.ts
   settings jsonb not null default '{"team_count": 8, "roster_size": {"celebrity": 4, "pro": 4}, "copies_per_contestant": 2, "draft_type": "snake", "pick_clock_seconds": 90}'
     check ((settings ->> 'team_count')::int between 3 and 12),
-  -- pending_payment until checkout succeeds (server/service role only flips it to active)
-  status text not null default 'pending_payment' check (status in ('pending_payment', 'active', 'archived')),
+  -- creating a league is free; cancelled = commissioner cancelled before the draft (refunds pending)
+  status text not null default 'active' check (status in ('active', 'cancelled', 'archived')),
   privacy text not null default 'private' check (privacy in ('private', 'public')),
   draft_status text not null default 'not_started' check (draft_status in ('not_started', 'in_progress', 'paused', 'complete')),
   locked_at timestamptz,
@@ -193,7 +193,8 @@ create table public.teams (
   name text not null check (char_length(name) between 1 and 40),
   draft_position int not null check (draft_position >= 1),
   created_at timestamptz not null default now(),
-  unique (league_id, draft_position)
+  -- deferrable so a reorder can swap positions inside one transaction
+  constraint teams_league_position_key unique (league_id, draft_position) deferrable initially deferred
 );
 
 create table public.picks (
@@ -210,6 +211,35 @@ create table public.picks (
   unique (league_id, contestant_id, copy)
 );
 create index picks_team_idx on public.picks (team_id);
+
+-- Auditable draft-order changes: seeded randomize (re-rollable) or manual reorder.
+create table public.draft_order_log (
+  id uuid primary key default gen_random_uuid(),
+  league_id uuid not null references public.leagues (id) on delete cascade,
+  roll int not null check (roll >= 1),
+  method text not null check (method in ('random', 'manual')),
+  seed text, -- random only: seed + input fully reproduce the order (src/lib/league/draft-order.ts)
+  input jsonb not null, -- canonical (sorted) team ids
+  draft_order jsonb not null, -- team ids, first pick first
+  created_by uuid references public.profiles (id) on delete set null,
+  created_at timestamptz not null default now(),
+  unique (league_id, roll),
+  check (method = 'manual' or seed is not null)
+);
+
+-- Commissioner score fixes apply to ONE league and never touch shared public.scores.
+create table public.league_score_overrides (
+  id uuid primary key default gen_random_uuid(),
+  league_id uuid not null references public.leagues (id) on delete cascade,
+  episode_id uuid not null references public.episodes (id) on delete cascade,
+  unit_id uuid not null references public.contestant_units (id) on delete cascade,
+  raw_score numeric not null check (raw_score >= 0),
+  eliminated boolean not null default false,
+  reason text,
+  created_by uuid references public.profiles (id) on delete set null,
+  created_at timestamptz not null default now(),
+  unique (league_id, episode_id, unit_id)
+);
 
 create table public.draft_sessions (
   league_id uuid primary key references public.leagues (id) on delete cascade,

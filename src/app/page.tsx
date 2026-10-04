@@ -5,8 +5,6 @@ import { Monogram } from "@/components/Monogram";
 
 export default async function Landing() {
   const user = await getCurrentUser();
-  const min = formatCents(billing.minMembers * billing.pricePerMemberCents);
-  const max = formatCents(billing.maxMembers * billing.pricePerMemberCents);
   return (
     <>
       <section className="hero">
@@ -45,9 +43,9 @@ export default async function Landing() {
           <div className="feature"><b>Snake draft, live</b>Everyone drafts in one room. Celebrities and pros are separate picks with fair roster slots.</div>
           <div className="feature"><b>Weekly scoring</b>Scores come in after each episode. Every drafted cast member earns their points.</div>
           <div className="feature"><b>Standings that matter</b>Podium, gold border for #1, Alive meters and a Max Possible that caps for who is left.</div>
-          <div className="feature"><b>Commissioner tools</b>Invite codes, roles, score overrides and league settings in one place.</div>
+          <div className="feature"><b>Commissioner tools</b>Invite codes, a paid/unpaid roster, randomized or manual draft order, and league-only score fixes.</div>
           <div className="feature"><b>Your colours</b>Pick Pink, Blue, Green, Red, White, Purple, Gold or Dark for your own view.</div>
-          <div className="feature"><b>Simple pricing</b>Accounts are free. A league is {formatCents(billing.pricePerMemberCents)} per member ({min} to {max} for 3 to 12 teams).</div>
+          <div className="feature"><b>Simple pricing</b>Free accounts, free to create a league. Each member pays a one-time {formatCents(billing.pricePerMemberCents)} platform fee, or the commissioner covers it. No prizes or payouts.</div>
         </div>
       </section>
     </>

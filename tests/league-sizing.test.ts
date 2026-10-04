@@ -20,14 +20,14 @@ const EXPECTED: [number, number, number, number, number][] = [
 
 describe("league sizing (16 couples)", () => {
   for (const [teams, copies, perTeam, perRole, leftover] of EXPECTED) {
-    it(`${teams} teams -> ${copies} cop${copies === 1 ? "y" : "ies"}, ${perTeam} per team (${perRole}/${perRole}), ${leftover} left over, $${teams * 3}`, () => {
+    it(`${teams} teams -> ${copies} cop${copies === 1 ? "y" : "ies"}, ${perTeam} per team (${perRole}/${perRole}), ${leftover} left over, $${teams * 5} in member fees`, () => {
       const s = leagueSizing(16, teams);
       expect(s).toEqual({ teams, castUnits: 16, copies, totalDancers: 32 * copies, perTeam, perRole, leftover });
       expect(s.perTeam % 2).toBe(0);
       expect(s.perTeam * teams + s.leftover).toBe(s.totalDancers);
       // enough of each role in the pool for every team's slots
       expect(s.perRole * teams).toBeLessThanOrEqual(16 * copies);
-      expect(quote(teams).totalCents).toBe(teams * 300);
+      expect(quote(teams).totalCents).toBe(teams * 500); // each member pays their own $5
     });
   }
 
@@ -35,8 +35,8 @@ describe("league sizing (16 couples)", () => {
     expect(sizingTable(16).map((r) => r.teams)).toEqual([3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
     for (const bad of [0, 2, 13, 7.5]) expect(() => leagueSizing(16, bad)).toThrow(RangeError);
     expect([3, 4, 5, 8, 9, 12].map(copiesForTeams)).toEqual([1, 1, 2, 2, 3, 3]);
-    expect(quote(3).totalCents).toBe(900);
-    expect(quote(12).totalCents).toBe(3600);
+    expect(quote(3).totalCents).toBe(1500);
+    expect(quote(12).totalCents).toBe(6000);
   });
 
   it("matches the girls' league exactly (8 teams, 2 copies, 8 per team, 4 pros + 4 celebrities)", () => {

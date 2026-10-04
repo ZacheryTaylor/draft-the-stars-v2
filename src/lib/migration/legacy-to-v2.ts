@@ -35,7 +35,8 @@ export interface MigrationPlan {
 export interface MigrationOptions {
   slug?: string;
   commissionerId?: string; // placeholder until Zach's v2 account exists
-  billingStatus?: LeagueBilling["status"];
+  /** The girls' league is fee-waived by default (it predates fees). */
+  feeWaived?: boolean;
   inviteCode?: (teamIndex: number) => string;
 }
 
@@ -122,12 +123,9 @@ export function mapLegacyLeague(data: LegacyData, opts: MigrationOptions = {}): 
     invites,
     billing: {
       leagueId,
-      status: opts.billingStatus ?? "waived",
       pricePerMemberCents: billing.pricePerMemberCents,
-      billedMemberCount: teams.length,
-      amountDueCents: opts.billingStatus === "pending" ? teams.length * billing.pricePerMemberCents : 0,
-      provider: null,
-      paidAt: null,
+      feeWaived: opts.feeWaived ?? true,
+      waivedReason: (opts.feeWaived ?? true) ? "Migrated v1 league (predates fees)" : null,
     },
     idMap: { teams: teamMap, contestants: Object.fromEntries(seasonBundle.contestants.map((c) => [c.key, c.id])) },
     warnings,
@@ -197,6 +195,8 @@ export function planToSql(plan: MigrationPlan, data: LegacyData): string {
   select ${q(L.slug)}, ${q(L.name)}, se.id, t.id, :'commissioner_id', ${q(JSON.stringify({ team_count: L.settings.teamCount, roster_size: L.settings.rosterSize, copies_per_contestant: L.settings.copiesPerContestant, draft_type: L.settings.draftType, pick_clock_seconds: L.settings.pickClockSeconds }))}::jsonb, 'private', ${q(L.draftStatus)}, ${q(data.league.lockedAt ?? null)}
   from public.seasons se join public.shows sh on sh.id = se.show_id, public.scoring_templates t
   where sh.slug = 'dwts' and se.number = ${data.season.season} and t.slug = ${q(L.scoringTemplateSlug)};`,
+    "-- fee settings first, so each new team slot's payment row is created as 'waived' (or 'unpaid'):",
+    `update public.league_billing set fee_waived = ${plan.billing.feeWaived}, waived_reason = ${q(plan.billing.waivedReason)} where league_id = (select id from public.leagues where slug = ${q(L.slug)});`,
   ];
   plan.teams.forEach((t) =>
     out.push(`insert into public.teams (league_id, name, draft_position) select id, ${q(t.name)}, ${t.draftPosition} from public.leagues where slug = ${q(L.slug)};`),
@@ -213,9 +213,7 @@ export function planToSql(plan: MigrationPlan, data: LegacyData): string {
     const team = plan.teams.find((t) => t.id === inv.claimTeamId)!;
     out.push(`insert into public.invites (league_id, code, created_by, max_uses, claim_team_id) select l.id, ${q(inv.code)}, :'commissioner_id', 1, tm.id from public.leagues l join public.teams tm on tm.league_id = l.id and tm.draft_position = ${team.draftPosition} where l.slug = ${q(L.slug)};`);
   });
-  out.push("-- league activation is a service-role write (bypasses the protect trigger):");
-  out.push(`update public.leagues set status = 'active' where slug = ${q(L.slug)};`);
-  out.push(`update public.league_billing set status = ${q(plan.billing.status)}, amount_due_cents = ${plan.billing.amountDueCents ?? 0} where league_id = (select id from public.leagues where slug = ${q(L.slug)});`);
+  out.push("-- leagues start active (creation is free); slot payments were created by trigger as waived/unpaid.");
   out.push("-- Then: rebuild standings_cache for this league and re-run the verification against the database.", "commit;", "");
   return out.join("\n");
 }

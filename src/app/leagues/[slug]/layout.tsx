@@ -25,7 +25,7 @@ export default async function LeagueLayout({ children, params }: { children: Rea
     { href: base, label: "Standings" },
     { href: `${base}/draft`, label: "Draft room" },
     ...(v.isCommissioner ? [{ href: `${base}/commissioner`, label: "Commissioner" }] : []),
-    { href: `${base}/billing`, label: "Billing" },
+    { href: `${base}/billing`, label: "Fees" },
   ];
   return (
     <>
@@ -41,12 +41,7 @@ export default async function LeagueLayout({ children, params }: { children: Rea
           <LeagueNav links={links} />
         </nav>
       </div>
-      {bundle.league.status === "pending_payment" && (
-        <p className="notice warn" style={{ marginTop: 16 }}>
-          <b>Awaiting payment.</b> This league is pending until checkout is complete. The draft room and invite codes unlock once it is paid.{" "}
-          {v.isCommissioner && <Link href={`${base}/billing`}>Go to checkout</Link>}
-        </p>
-      )}
+      {bundle.league.status === "cancelled" && <p className="notice warn" style={{ marginTop: 16 }}><b>Cancelled.</b> Paid fees are refunded to whoever paid them (placeholder).</p>}
       {children}
     </>
   );

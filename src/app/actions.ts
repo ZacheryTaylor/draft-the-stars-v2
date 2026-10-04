@@ -70,57 +70,113 @@ export async function createLeague(form: FormData) {
       privacy: str(form, "privacy") === "public" ? "public" : "private",
     }),
   );
-  redirect(league.status === "pending_payment" ? `/leagues/${league.slug}/billing?new=1` : `/leagues/${league.slug}`);
+  // Creating is free; next stop is the payment roster (each member pays their own $5, or the commissioner covers).
+  redirect(`/leagues/${league.slug}/billing?new=1`);
 }
 
-/** Checkout. Today the provider is always the mock, which settles instantly. */
-export async function checkoutLeague(form: FormData) {
+async function leagueFor(slug: string) {
+  const bundle = await getData().getLeague(slug);
+  if (!bundle) return back("/dashboard", "League not found");
+  return bundle;
+}
+
+/**
+ * ONE checkout for one or more slots (quantity x $5): a member's own slot ("mine"), the commissioner's
+ * selected slots ("selected", multi-select) or every unpaid slot ("all_unpaid", open slots included).
+ * Today the provider is always the mock, which settles instantly.
+ */
+export async function checkoutSlots(form: FormData) {
   const slug = str(form, "slug");
   const path = `/leagues/${slug}/billing`;
   const user = await requireUser(path);
-  const bundle = await getData().getLeague(slug);
-  if (!bundle) back("/dashboard", "League not found");
-  const { league } = bundle!;
-  if (!bundle!.members.some((m) => m.userId === user.id && m.role !== "player")) back(path, "Only the commissioner can pay for the league");
-  if (league.status === "active") back(path, "This league is already paid");
+  const { league, teams } = await leagueFor(slug);
+  const mode = str(form, "mode");
+  const selection: string[] | "all_unpaid" =
+    mode === "all_unpaid" ? "all_unpaid" : mode === "mine" ? teams.filter((t) => t.ownerId === user.id).map((t) => t.id) : form.getAll("teamId").map(String);
+  const plan = await run(path, () => getData().planSlotCheckout(user.id, league.id, selection));
   const provider = getPaymentProvider();
   const result = await provider.createCheckout({
     leagueId: league.id,
     leagueName: league.name,
     payerId: user.id,
-    memberCount: league.settings.teamCount,
-    pricePerMemberCents: billing.pricePerMemberCents,
+    teamIds: plan.teamIds,
+    quantity: plan.quantity,
+    amountCents: plan.amountCents,
     currency: billing.currency,
-    successUrl: `${path}?paid=1`,
+    successUrl: `${path}?paid=${plan.quantity}`,
     cancelUrl: path,
   });
   if (result.kind === "redirect") redirect(result.url);
   if (result.kind === "unavailable") back(path, result.reason);
   if (result.kind === "paid") {
-    await getData().recordPayment({
-      leagueId: league.id,
-      payerId: user.id,
-      provider: provider.id,
-      providerPaymentId: result.providerPaymentId,
-      amountCents: result.amountCents,
-      currency: billing.currency,
-      memberCount: league.settings.teamCount,
-      pricePerMemberCents: billing.pricePerMemberCents,
-      status: "succeeded",
-    });
+    await run(path, () =>
+      getData().markSlotsPaid({ leagueId: league.id, teamIds: plan.teamIds, payerId: user.id, provider: provider.id, checkoutId: result.providerPaymentId, providerPaymentId: result.providerPaymentId }),
+    );
   }
   revalidatePath(`/leagues/${slug}`, "layout");
-  redirect(`${path}?paid=1`);
+  redirect(`${path}?paid=${plan.quantity}`);
 }
 
-export async function resetMockBilling(form: FormData) {
+export async function remindUnpaid(form: FormData) {
   const slug = str(form, "slug");
   const path = `/leagues/${slug}/billing`;
   const user = await requireUser(path);
-  const bundle = await getData().getLeague(slug);
-  await run(path, () => getData().resetBilling(user.id, bundle!.league.id));
+  const { league } = await leagueFor(slug);
+  const { to } = await run(path, () => getData().remindUnpaid(user.id, league.id, str(form, "teamId")));
+  if (to) await sendEmail({ to, subject: `Reminder: your ${league.name} platform fee`, text: "Placeholder reminder email" });
+  revalidatePath(path);
+  redirect(`${path}?saved=reminder`);
+}
+
+export async function requestRefund(form: FormData) {
+  const slug = str(form, "slug");
+  const path = `/leagues/${slug}/billing`;
+  const user = await requireUser(path);
+  const { league } = await leagueFor(slug);
+  const p = await run(path, () => getData().requestRefund(user.id, league.id, str(form, "teamId")));
+  if (p.providerPaymentId) await getPaymentProvider().refund(p.providerPaymentId, p.amountCents); // TODO(refunds)
   revalidatePath(`/leagues/${slug}`, "layout");
-  redirect(path);
+  redirect(`${path}?saved=refund`);
+}
+
+export async function removeMember(form: FormData) {
+  const slug = str(form, "slug");
+  const path = `/leagues/${slug}/billing`;
+  const user = await requireUser(path);
+  const { league } = await leagueFor(slug);
+  await run(path, () => getData().removeMember(user.id, league.id, str(form, "memberId")));
+  revalidatePath(`/leagues/${slug}`, "layout");
+  redirect(`${path}?saved=removed`);
+}
+
+export async function randomizeDraftOrder(form: FormData) {
+  const slug = str(form, "slug");
+  const path = `/leagues/${slug}/commissioner`;
+  const user = await requireUser(path);
+  const { league } = await leagueFor(slug);
+  await run(path, () => getData().randomizeDraftOrder(user.id, league.id, str(form, "seed") || undefined));
+  revalidatePath(`/leagues/${slug}`, "layout");
+  redirect(`${path}?saved=order#draft-order`);
+}
+
+export async function saveDraftOrder(form: FormData) {
+  const slug = str(form, "slug");
+  const path = `/leagues/${slug}/commissioner`;
+  const user = await requireUser(path);
+  const { league } = await leagueFor(slug);
+  await run(path, () => getData().setDraftOrder(user.id, league.id, str(form, "order").split(",").filter(Boolean)));
+  revalidatePath(`/leagues/${slug}`, "layout");
+  redirect(`${path}?saved=order#draft-order`);
+}
+
+export async function clearScoreOverride(form: FormData) {
+  const slug = str(form, "slug");
+  const path = `/leagues/${slug}/commissioner`;
+  const user = await requireUser(path);
+  const { league } = await leagueFor(slug);
+  await run(path, () => getData().clearScoreOverride(user.id, league.id, str(form, "overrideId")));
+  revalidatePath(`/leagues/${slug}`, "layout");
+  redirect(`${path}?saved=score`);
 }
 
 export async function joinLeague(form: FormData) {
@@ -157,7 +213,7 @@ export async function overrideScore(form: FormData) {
   const user = await requireUser(path);
   const bundle = await getData().getLeague(slug);
   await run(path, () =>
-    getData().overrideScore(user.id, bundle!.league.id, Number(str(form, "week")), str(form, "unitId"), Number(str(form, "score")), form.get("eliminated") === "on"),
+    getData().overrideScore(user.id, bundle!.league.id, Number(str(form, "week")), str(form, "unitId"), Number(str(form, "score")), form.get("eliminated") === "on", str(form, "reason")),
   );
   revalidatePath(`/leagues/${slug}`, "layout");
   redirect(`${path}?saved=score`);

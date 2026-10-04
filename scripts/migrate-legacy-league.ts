@@ -39,7 +39,7 @@ const data: LegacyData = {
 };
 const baseline = baselinePath && existsSync(baselinePath) ? JSON.parse(readFileSync(baselinePath, "utf8")) : undefined;
 
-const plan = mapLegacyLeague(data, { billingStatus: (arg("billing") as "waived" | "pending" | undefined) ?? "waived" });
+const plan = mapLegacyLeague(data, { feeWaived: arg("billing") !== "unpaid" }); // --billing=unpaid to charge the $5 fee
 const result = verifyMigration(plan, data, baseline);
 
 mkdirSync(outDir, { recursive: true });

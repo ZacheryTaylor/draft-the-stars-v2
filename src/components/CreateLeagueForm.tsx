@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { leagueSizing, sizingTable, MIN_TEAMS, MAX_TEAMS } from "@/lib/league/sizing";
-import { formatCents, quote } from "@/lib/billing";
+import { FEE_COPY, formatCents, quote } from "@/lib/billing";
 
 interface SeasonOption { id: string; label: string; castUnits: number; unitLabel: string }
 
@@ -41,20 +41,22 @@ export function CreateLeagueForm({ seasons, action, providerConnected }: { seaso
             <div className="stat"><b>{s.leftover}</b><span>Undrafted</span></div>
           </div>
           <div className="receipt">
-            <div><span>Members</span><b>{teams}</b></div>
-            <div><span>Price per member</span><b>{formatCents(q.pricePerMemberCents)}</b></div>
-            <div className="total"><span>Total</span><span>{formatCents(q.totalCents)}</span></div>
+            <div><span>Creating the league</span><b>Free</b></div>
+            <div><span>Member slots</span><b>{teams}</b></div>
+            <div><span>Platform fee, each member pays</span><b>{formatCents(q.pricePerMemberCents)}</b></div>
+            <div className="total"><span>If you cover everyone</span><span>{formatCents(q.totalCents)}</span></div>
           </div>
           <p className="hint">{season.castUnits} {season.unitLabel}s × 2 dancers × {s.copies} = {s.totalDancers} draftable dancers. {s.leftover ? `${s.leftover} stay undrafted (future free-agent pool).` : "Everyone gets drafted."}</p>
         </div>
       </div>
-      {!providerConnected && <p className="notice warn"><b>Payment provider not connected.</b> Next you will see a mock checkout; no money moves. The league stays <b>pending payment</b> until checkout succeeds.</p>}
-      <div className="row"><button className="primary" type="submit">Create league & continue to checkout ({formatCents(q.totalCents)})</button></div>
+      <p className="hint">{FEE_COPY.long} You pay your own {formatCents(q.pricePerMemberCents)} too, and can cover other members&apos; fees in one checkout. Collecting from members happens off-platform. The draft starts once every slot is filled and paid.</p>
+      {!providerConnected && <p className="notice warn"><b>Payment provider not connected.</b> Fees use a mock checkout for now; no money moves.</p>}
+      <div className="row"><button className="primary" type="submit">Create league (free)</button></div>
 
-      <h3>Copies, roster size and price by team count</h3>
+      <h3>Copies, roster size and fees by team count</h3>
       <div className="table-scroll">
         <table className="sizing-table">
-          <thead><tr><th>Teams</th><th className="num">Copies</th><th className="num">Dancers</th><th className="num">Per team</th><th className="num">Celebs / pros</th><th className="num">Left over</th><th className="num">Price</th></tr></thead>
+          <thead><tr><th>Teams</th><th className="num">Copies</th><th className="num">Dancers</th><th className="num">Per team</th><th className="num">Celebs / pros</th><th className="num">Left over</th><th className="num">Fees if all covered</th></tr></thead>
           <tbody>
             {sizingTable(season.castUnits).map((r) => (
               <tr key={r.teams} className={r.teams === teams ? "selected" : ""} aria-current={r.teams === teams ? "true" : undefined}>

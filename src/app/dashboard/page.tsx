@@ -37,12 +37,12 @@ export default async function Dashboard() {
               <div className="row">
                 <span className="pill">{l.role === "player" ? "Player" : "Commissioner"}</span>
                 <span className="pill">{l.memberCount}/{l.league.settings.teamCount} members</span>
-                {l.league.status === "pending_payment" ? <span className="pill pill-gold">Awaiting payment</span> : <span className="pill">Active</span>}
+                <span className={`pill ${l.paidSlots === l.league.settings.teamCount ? "" : "pill-gold"}`}>{l.paidSlots}/{l.league.settings.teamCount} paid</span>
                 <span className="pill">Draft: {l.league.draftStatus.replace("_", " ")}</span>
               </div>
               {l.teamName && <p className="hint" style={{ margin: 0 }}>Your team: <b>{l.teamName}</b></p>}
-              {l.league.status === "pending_payment" && l.role !== "player" && (
-                <Link className="btn primary" href={`/leagues/${l.league.slug}/billing`}>Complete checkout</Link>
+              {l.myPaymentStatus === "unpaid" && l.league.draftStatus === "not_started" && (
+                <Link className="btn primary" href={`/leagues/${l.league.slug}/billing`}>Pay my $5 fee</Link>
               )}
             </article>
           ))}

@@ -230,3 +230,20 @@ footer { padding: var(--space-5) var(--space-4) var(--space-6); color: var(--mut
   .rank-table tr.team-row.is-leader > td { border: 0 !important; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* payment roster + draft order */
+input[type="checkbox"] { width: 20px; min-height: 20px; height: 20px; padding: 0; accent-color: var(--accent-strong); cursor: pointer; }
+input[type="checkbox"]:disabled { cursor: not-allowed; }
+.btn-sm { min-height: 32px; padding: 5px 12px; font-size: 12px; }
+.inline-form { display: inline; margin: 0; }
+.roster-actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.pill-ok { color: var(--on-accent); background: var(--accent-strong); border-color: var(--accent-strong); }
+.sticky-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-3); padding: 12px 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-alt); }
+.order-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.order-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); cursor: grab; }
+.order-item.dragging { opacity: 0.5; }
+.order-item.drop-target { border-color: var(--accent-strong); box-shadow: 0 0 0 2px var(--accent-soft); }
+.order-pos { min-width: 28px; font-weight: 800; color: var(--accent-strong); font-variant-numeric: tabular-nums; }
+.order-item .grow { flex: 1; }
+.order-locked .order-item { cursor: default; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }

@@ -4,8 +4,9 @@ import type { ThemeId } from "@/lib/themes/presets";
 export type MemberRole = "commissioner" | "co_commissioner" | "player";
 export type ContestantRole = "celebrity" | "pro" | "solo";
 export type DraftStatus = "not_started" | "in_progress" | "paused" | "complete";
-export type BillingStatus = "pending" | "active" | "waived" | "refunded";
-export type LeagueStatus = "pending_payment" | "active" | "archived";
+/** Per team slot. paid/waived count toward the draft gate. */
+export type MemberPaymentStatus = "unpaid" | "paid" | "waived" | "refund_pending" | "refunded" | "void";
+export type LeagueStatus = "active" | "cancelled" | "archived";
 
 export interface Profile {
   id: string;
@@ -76,7 +77,7 @@ export interface League {
   ownerId: string;
   settings: LeagueSettings;
   privacy: "private" | "public";
-  /** pending_payment until checkout succeeds. */
+  /** Creating a league is free: leagues start active. cancelled = commissioner cancelled before the draft. */
   status: LeagueStatus;
   draftStatus: DraftStatus;
   createdAt: string;
@@ -104,33 +105,68 @@ export interface Invite {
   claimTeamId: string | null;
   revoked: boolean;
 }
+/** League-level fee settings. Each team slot has its own SlotPayment row. */
 export interface LeagueBilling {
   leagueId: string;
-  status: BillingStatus;
-  pricePerMemberCents: number;
-  billedMemberCount: number | null;
-  amountDueCents: number | null;
-  provider: "mock" | "stripe" | null;
-  paidAt: string | null;
+  pricePerMemberCents: number; // 500
+  feeWaived: boolean; // e.g. the migrated girls' league
+  waivedReason: string | null;
 }
-export interface Payment {
+
+/**
+ * One row per team slot (public.payments). memberId = who holds the slot (null while open);
+ * payerId = who paid (the member, or the commissioner covering it). Only the server (mock checkout
+ * or provider webhook) can set status = 'paid'.
+ */
+export interface SlotPayment {
   id: string;
   leagueId: string;
+  teamId: string;
+  memberId: string | null;
   payerId: string | null;
-  provider: "mock" | "stripe";
-  providerPaymentId: string;
   amountCents: number;
   currency: string;
-  memberCount: number;
-  pricePerMemberCents: number;
-  status: "pending" | "succeeded" | "failed" | "refunded";
+  status: MemberPaymentStatus;
+  provider: "mock" | "stripe" | null;
+  checkoutId: string | null; // one checkout can cover several slots (quantity x $5)
+  providerPaymentId: string | null;
+  paidAt: string | null;
+  remindedAt: string | null;
+  refundToId: string | null; // refunds go back to whoever paid
   createdAt: string;
 }
+export type Payment = SlotPayment;
+
+export interface DraftOrderLog {
+  id: string;
+  leagueId: string;
+  roll: number;
+  method: "random" | "manual";
+  seed: string | null;
+  input: string[];
+  order: string[];
+  createdBy: string;
+  createdAt: string;
+}
+
+/** Commissioner score fix for ONE league. Never touches shared public.scores. */
+export interface ScoreOverride {
+  id: string;
+  leagueId: string;
+  episodeId: string;
+  unitId: string;
+  rawScore: number;
+  eliminated: boolean;
+  reason: string | null;
+  createdBy: string;
+  createdAt: string;
+}
+
 export interface Entitlement {
   id: string;
   userId: string | null;
   leagueId: string | null;
-  kind: "league_season_pass" | "cosmetic" | "feature";
+  kind: "league_membership" | "cosmetic" | "feature";
   sourcePaymentId: string | null;
   startsAt: string;
   endsAt: string | null;
@@ -160,8 +196,10 @@ export interface DbState extends Omit<SeasonBundle, "show" | "season" | "units" 
   picks: Pick[];
   invites: Invite[];
   leagueBilling: LeagueBilling[];
-  payments: Payment[];
+  payments: SlotPayment[];
   entitlements: Entitlement[];
+  draftOrderLog: DraftOrderLog[];
+  scoreOverrides: ScoreOverride[];
 }
 
 export interface LeagueBundle extends SeasonBundle {
@@ -171,4 +209,7 @@ export interface LeagueBundle extends SeasonBundle {
   picks: Pick[];
   invites: Invite[];
   billing: LeagueBilling;
+  payments: SlotPayment[];
+  draftOrderLog: DraftOrderLog[];
+  scoreOverrides: ScoreOverride[];
 }
