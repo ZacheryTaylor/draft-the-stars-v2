@@ -23,7 +23,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <a className="skip" href="#main">Skip to content</a>
         <SiteHeader user={user} r={serverRoutes} logout={logOut} saveTheme={saveTheme} />
         <main id="main">{children}</main>
-        <SiteFooter />
+        <SiteFooter r={serverRoutes} />
       </body>
     </html>
   );

@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { LeagueShell } from "@/views/LeagueViews";
 import { SiteFooter, SiteHeader } from "@/views/SiteHeader";
 import { demoRoutes } from "@/views/routes";
+import { LEGAL_SLUGS } from "@/lib/legal/company";
 import { useDemoActions } from "./actions";
 import { clearFlash, demoData, useDemo } from "./store";
 import type { LeagueBundle, Profile } from "@/lib/data/types";
@@ -15,6 +16,8 @@ export function DemoShell({ children }: { children: React.ReactNode }) {
   const { ready, user } = useDemo();
   const act = useDemoActions("shell");
   const path = usePathname();
+  // Legal pages need no demo data, so they render (and prerender) without waiting for the store.
+  const isLegal = (LEGAL_SLUGS as readonly string[]).includes(path.replace(/^\/|\/$/g, ""));
   // A page's in-place messages belong to that page visit.
   useEffect(() => clearFlash(), [path]);
   return (
@@ -24,8 +27,8 @@ export function DemoShell({ children }: { children: React.ReactNode }) {
         <button type="button" onClick={act.resetDemo} data-testid="reset-demo">Reset demo</button>
       </div>
       <SiteHeader user={user} r={demoRoutes} logout={act.logOut} saveTheme={act.saveTheme} />
-      <main id="main">{ready ? <Suspense fallback={<Loading />}>{children}</Suspense> : <Loading />}</main>
-      <SiteFooter />
+      <main id="main">{ready || isLegal ? <Suspense fallback={<Loading />}>{children}</Suspense> : <Loading />}</main>
+      <SiteFooter r={demoRoutes} />
     </>
   );
 }

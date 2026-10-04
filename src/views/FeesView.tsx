@@ -1,4 +1,6 @@
+import Link from "next/link";
 import type { LeagueBundle, Profile } from "@/lib/data/types";
+import type { Routes } from "./routes";
 import { viewerRole } from "@/lib/data/league-view";
 import { activeSlotPayment as slotPayment, billing, draftReadiness, FEE_COPY, formatCents } from "@/lib/billing";
 import { FormMessage } from "@/components/FormMessage";
@@ -18,7 +20,15 @@ const SAVED: Record<string, string> = {
   removed: "Member removed. Their slot is open again; share the invite code to replace them.",
 };
 
-export function FeesView({ b, user, slug, sp, act, stripeLabel, mockLabel }: { b: LeagueBundle; user: Profile | null; slug: string; sp: FeesFlash; act: FeesActions; stripeLabel: string; mockLabel: string }) {
+function RefundNote({ r }: { r: Routes }) {
+  return (
+    <p className="hint" data-testid="refund-note">
+      {FEE_COPY.refund} <Link href={r.legal("refunds")}>Refund policy</Link> · <Link href={r.legal("fees-disclosure")}>Fee &amp; no-prize disclosure</Link>
+    </p>
+  );
+}
+
+export function FeesView({ b, user, slug, sp, act, stripeLabel, mockLabel, r }: { b: LeagueBundle; user: Profile | null; slug: string; sp: FeesFlash; act: FeesActions; stripeLabel: string; mockLabel: string; r: Routes }) {
   const v = viewerRole(b, user);
   if (!v.isMember) return null;
   const price = b.billing.pricePerMemberCents;
@@ -79,6 +89,7 @@ export function FeesView({ b, user, slug, sp, act, stripeLabel, mockLabel }: { b
                   <div className="total"><span>Total</span><span>{formatCents(price)}</span></div>
                 </div>
                 <button type="submit" className="primary" disabled={locked}>Pay my {formatCents(price)} with mock checkout</button>
+                <RefundNote r={r} />
               </form>
             ) : (
               <p className="notice">
@@ -109,6 +120,7 @@ export function FeesView({ b, user, slug, sp, act, stripeLabel, mockLabel }: { b
           </p>
         )}
         <PaymentRoster key={rows.map((x) => `${x.teamId}:${x.status}:${x.memberId}`).join()} slug={slug} rows={rows} priceCents={price} isCommissioner={v.isCommissioner} locked={locked} checkout={act.checkoutSlots} remind={act.remindUnpaid} refund={act.requestRefund} remove={act.removeMember} />
+        {v.isCommissioner && !locked && <RefundNote r={r} />}
         {v.isCommissioner && <p className="hint">Placeholders: Remind (email stub), Refund (goes back to whoever paid; TODO(refunds)), Remove (replace an unpaid member before the draft).</p>}
       </div>
 

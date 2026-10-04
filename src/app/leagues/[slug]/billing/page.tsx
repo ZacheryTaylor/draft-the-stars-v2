@@ -3,6 +3,7 @@ import { getData } from "@/lib/data";
 import { getPaymentProvider, realProvider } from "@/lib/billing/get-provider";
 import { checkoutSlots, remindUnpaid, removeMember, requestRefund } from "../../../actions";
 import { FeesView, type FeesFlash } from "@/views/FeesView";
+import { serverRoutes } from "@/views/routes";
 
 export const metadata = { title: "League fees" };
 
@@ -10,6 +11,6 @@ export default async function BillingPage({ params, searchParams }: { params: Pr
   const { slug } = await params;
   return (
     <FeesView b={(await getData().getLeague(slug))!} user={await getCurrentUser()} slug={slug} sp={await searchParams}
-      act={{ checkoutSlots, remindUnpaid, requestRefund, removeMember }} stripeLabel={realProvider().label} mockLabel={getPaymentProvider().label} />
+      act={{ checkoutSlots, remindUnpaid, requestRefund, removeMember }} stripeLabel={realProvider().label} mockLabel={getPaymentProvider().label} r={serverRoutes} />
   );
 }

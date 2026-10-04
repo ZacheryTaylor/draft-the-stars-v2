@@ -11,6 +11,7 @@
     "test": "vitest run",
     "migrate:dry-run": "tsx scripts/migrate-legacy-league.ts --dry-run",
     "seed:generate": "tsx scripts/generate-seed.ts",
+    "legal:export": "tsx scripts/export-legal.ts",
     "test:watch": "vitest",
     "check": "npm run lint && npm run typecheck && npm test && npm run build",
     "build:demo": "node scripts/build-demo.mjs"

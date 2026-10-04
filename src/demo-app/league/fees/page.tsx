@@ -2,6 +2,7 @@
 import { useSearchParams } from "next/navigation";
 import { getPaymentProvider, realProvider } from "@/lib/billing/get-provider";
 import { FeesView } from "@/views/FeesView";
+import { demoRoutes } from "@/views/routes";
 import { DemoLeague } from "@/demo/DemoShell";
 import { useDemoActions } from "@/demo/actions";
 import { getFlash, useDemo } from "@/demo/store";
@@ -14,7 +15,7 @@ export default function DemoFees() {
   return (
     <DemoLeague>
       {(b, user, slug) => (
-        <FeesView b={b} user={user} slug={slug} sp={{ ...f, new: f.paid || f.saved ? undefined : isNew }} act={act} stripeLabel={realProvider().label} mockLabel={getPaymentProvider().label} />
+        <FeesView b={b} user={user} slug={slug} sp={{ ...f, new: f.paid || f.saved ? undefined : isNew }} act={act} stripeLabel={realProvider().label} mockLabel={getPaymentProvider().label} r={demoRoutes} />
       )}
     </DemoLeague>
   );

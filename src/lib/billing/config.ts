@@ -30,4 +30,5 @@ export const FEE_COPY = {
   short: "$5 platform fee per member",
   long: "Each member pays a one-time $5 platform fee for the league. It is a platform fee only: no prizes or payouts are paid from fees.",
   cover: "The commissioner can cover other members' fees in one checkout. Any collecting from members happens off-platform; Draft the Stars doesn't handle it.",
+  refund: "Refunds: if a member leaves or the league is cancelled before the draft starts, the fee is refunded in full to whoever paid it. No refunds after the draft starts, except where the law requires.",
 } as const;

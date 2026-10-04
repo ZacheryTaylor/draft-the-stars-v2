@@ -19,6 +19,15 @@ Fantasy drafts for any reality competition: draft the cast, score every episode,
 
 How it works: `npm run build:demo` (scripts/build-demo.mjs) swaps `src/demo-app` in as the app and runs a Next.js static export with `basePath=/draft-the-stars-v2`. Pages and the server app share the same views (`src/views`), and the demo runs the same `MockAdapter` in the browser, persisted to localStorage (`src/demo`). Deployed by `.github/workflows/pages.yml`. League pages use `?slug=` (`/league/fees/?slug=office-party`) so leagues created in the browser work without prebuilt pages.
 
+
+## Legal pages
+
+Final legal documents (effective October 4, 2026), operated by ZT, LLC (Florida): `/terms` (includes Acceptable Use and DMCA), `/privacy` (includes the Cookie Notice and data deletion), `/refunds`, `/fees-disclosure`, `/contact`. Linked from the footer on every page, the sign-up form, and the league fees checkout.
+
+- Text lives in one place: `src/lib/legal/documents.ts` (company details and contact email in `src/lib/legal/company.ts`). Both the server app and the GitHub Pages demo render it with `src/views/LegalView.tsx`.
+- `npm run legal:export` writes the same documents as Markdown to `./legal-export/` for the Google Docs copies.
+- `tests/legal.test.ts` checks there are no placeholders, the key facts are present, and every internal link/anchor resolves.
+
 ## What's built
 
 | Area | Where |

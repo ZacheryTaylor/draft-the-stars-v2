@@ -4,6 +4,7 @@ import type { ThemeId } from "@/lib/themes/presets";
 import { Monogram } from "@/components/Monogram";
 import { NavLinks } from "@/components/NavLinks";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
+import { COMPANY } from "@/lib/legal/company";
 import type { FormAction, Routes } from "./routes";
 
 export function SiteHeader({ user, r, logout, saveTheme }: { user: Profile | null; r: Routes; logout: FormAction; saveTheme: (t: ThemeId) => Promise<unknown> }) {
@@ -46,12 +47,25 @@ export function SiteHeader({ user, r, logout, saveTheme }: { user: Profile | nul
   );
 }
 
-export function SiteFooter() {
+export function SiteFooter({ r }: { r: Routes }) {
+  const links = [
+    { href: r.legal("terms"), label: "Terms" },
+    { href: r.legal("privacy"), label: "Privacy" },
+    { href: `${r.legal("privacy")}#cookies`, label: "Cookies" },
+    { href: r.legal("refunds"), label: "Refunds" },
+    { href: r.legal("fees-disclosure"), label: "Fee & No-Prize Disclosure" },
+    { href: r.legal("contact"), label: "Contact" },
+  ];
   return (
     <footer>
-      Fan-made and not affiliated with any show, network or production company. No logos or photos: monograms only.
+      <nav className="footer-links" aria-label="Legal and support" data-testid="footer-legal">
+        {links.map((l) => <Link key={l.label} href={l.href}>{l.label}</Link>)}
+      </nav>
+      Fan-made and not affiliated with the BBC, ABC, Disney, or any show, network or production company. No logos or photos: monograms only.
       <br />
       Free accounts · free to create a league · $5 platform fee per member (no prizes or payouts) · Draft the Stars v2 preview (mock data, placeholder services)
+      <br />
+      © 2026 {COMPANY.legalName}
     </footer>
   );
 }

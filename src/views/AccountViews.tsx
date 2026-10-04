@@ -91,6 +91,9 @@ export function SignupView({ action, error, r, demo }: { action: FormAction; err
         <label>Password<input name="password" type="password" minLength={8} autoComplete="new-password" placeholder="Not stored (placeholder)" /></label>
         <label>Birth year (you must be 13 or older)<input name="birthYear" type="number" required min={1900} max={new Date().getFullYear()} /></label>
         <input type="hidden" name="theme" id="signup-theme" />
+        <p className="hint" data-testid="signup-consent">
+          By creating an account you agree to the <Link href={r.legal("terms")}>Terms</Link> and <Link href={r.legal("privacy")}>Privacy Policy</Link>. If you are under 18, you need a parent&apos;s or guardian&apos;s permission.
+        </p>
         <div className="row">
           <button className="primary" type="submit">Create account</button>
           <Link href={r.login()}>I already have one</Link>
