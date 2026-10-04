@@ -1,0 +1,417 @@
+{
+  "url": "https://zacherytaylor.github.io/dwts-draft/",
+  "capturedAt": "2026-10-02T20:32:05.553Z",
+  "rankings": [
+    {
+      "rank": "1",
+      "team": "ChaChaChuck",
+      "points": "171.40",
+      "alive": "6/8",
+      "mpp": "1371.40",
+      "roster": [
+        "Jenna Johnson",
+        "Jenna Dewan",
+        "Tyler Cameron",
+        "Sharna Burgess",
+        "Taylor Hanson (out)",
+        "Britt Stewart (out)",
+        "Tatyana Ali",
+        "Jan Ravnik"
+      ]
+    },
+    {
+      "rank": "2",
+      "team": "Mirrorball (Abby's Version)",
+      "points": "166.73",
+      "alive": "6/8",
+      "mpp": "1366.73",
+      "roster": [
+        "Harry Shum Jr.",
+        "Pasha Pashkov",
+        "Mark Ballas",
+        "Ezra Frech",
+        "Emma Slater",
+        "Taylor Hanson (out)",
+        "Hailey Bills (out)",
+        "Tatyana Ali"
+      ]
+    },
+    {
+      "rank": "3",
+      "team": "The Underdogs",
+      "points": "161.40",
+      "alive": "7/8",
+      "mpp": "1561.40",
+      "roster": [
+        "Val Chmerkovskiy",
+        "Jenna Johnson",
+        "Pasha Pashkov",
+        "Ezra Frech",
+        "Ciara Miller",
+        "Brandon Armstrong",
+        "Sarah Jane Nader (out)",
+        "Guillermo Rodriguez"
+      ]
+    },
+    {
+      "rank": "4",
+      "team": "Disko Kate",
+      "points": "158.00",
+      "alive": "6/8",
+      "mpp": "1358.00",
+      "roster": [
+        "Jenna Dewan",
+        "Amber Glenn",
+        "Ezra Sosa",
+        "Jackson Olson",
+        "Brandon Armstrong",
+        "Britt Stewart (out)",
+        "Sarah Jane Nader (out)",
+        "Jan Ravnik"
+      ]
+    },
+    {
+      "rank": "5",
+      "team": "JoWithTheFlow",
+      "points": "151.20",
+      "alive": "6/8",
+      "mpp": "1351.20",
+      "roster": [
+        "Harry Shum Jr.",
+        "Daniella Karagach",
+        "Maura Higgins",
+        "Sharna Burgess",
+        "Connor Wood",
+        "Alan Bersten (out)",
+        "Giada De Laurentiis (out)",
+        "Witney Carson"
+      ]
+    },
+    {
+      "rank": "6",
+      "team": "Mirrorball Occasionally",
+      "points": "143.53",
+      "alive": "7/8",
+      "mpp": "1543.53",
+      "roster": [
+        "Ezra Sosa",
+        "Rylee Arnold",
+        "Julia Stiles",
+        "Tyler Cameron",
+        "Emma Slater",
+        "Ciara Miller",
+        "Guillermo Rodriguez",
+        "Adele Zaikman (out)"
+      ]
+    },
+    {
+      "rank": "7",
+      "team": "Takes Two To Tango",
+      "points": "135.80",
+      "alive": "6/8",
+      "mpp": "1335.80",
+      "roster": [
+        "Val Chmerkovskiy",
+        "Julia Stiles",
+        "Rylee Arnold",
+        "Maura Higgins",
+        "Connor Wood",
+        "Hailey Bills (out)",
+        "Conner Leavitt (out)",
+        "Witney Carson"
+      ]
+    },
+    {
+      "rank": "8",
+      "team": "Carol's Mirrorball Mafia",
+      "points": "124.20",
+      "alive": "4/8",
+      "mpp": "924.20",
+      "roster": [
+        "Mark Ballas",
+        "Amber Glenn",
+        "Daniella Karagach",
+        "Jackson Olson",
+        "Alan Bersten (out)",
+        "Giada De Laurentiis (out)",
+        "Conner Leavitt (out)",
+        "Adele Zaikman (out)"
+      ]
+    }
+  ],
+  "weeks": [
+    {
+      "week": "Week 3",
+      "rows": [
+        [
+          "Tatyana Ali / Jan Ravnik",
+          "21/30",
+          "9.80 pts",
+          "Safe"
+        ],
+        [
+          "Tyler Cameron / Sharna Burgess",
+          "17/30",
+          "7.93 pts",
+          "Safe"
+        ],
+        [
+          "Jenna Dewan / Val Chmerkovskiy",
+          "21/30",
+          "9.80 pts",
+          "Safe"
+        ],
+        [
+          "Ezra Frech / Daniella Karagach",
+          "21/30",
+          "9.80 pts",
+          "Safe"
+        ],
+        [
+          "Amber Glenn / Pasha Pashkov",
+          "24/30",
+          "11.20 pts",
+          "Safe"
+        ],
+        [
+          "Taylor Hanson / Britt Stewart",
+          "18/30",
+          "8.40 pts",
+          "Eliminated"
+        ],
+        [
+          "Maura Higgins / Mark Ballas",
+          "22/30",
+          "10.27 pts",
+          "Safe"
+        ],
+        [
+          "Ciara Miller / Brandon Armstrong",
+          "18/30",
+          "8.40 pts",
+          "Safe"
+        ],
+        [
+          "Jackson Olson / Emma Slater",
+          "18/30",
+          "8.40 pts",
+          "Safe"
+        ],
+        [
+          "Guillermo Rodriguez / Witney Carson",
+          "15/30",
+          "7.00 pts",
+          "Safe"
+        ],
+        [
+          "Harry Shum Jr. / Jenna Johnson",
+          "24/30",
+          "11.20 pts",
+          "Safe"
+        ],
+        [
+          "Julia Stiles / Ezra Sosa",
+          "19/30",
+          "8.87 pts",
+          "Safe"
+        ],
+        [
+          "Connor Wood / Rylee Arnold",
+          "20/30",
+          "9.33 pts",
+          "Safe"
+        ]
+      ]
+    },
+    {
+      "week": "Week 2",
+      "rows": [
+        [
+          "Tatyana Ali / Jan Ravnik",
+          "18/30",
+          "7.20 pts",
+          "Safe"
+        ],
+        [
+          "Tyler Cameron / Sharna Burgess",
+          "16/30",
+          "6.40 pts",
+          "Safe"
+        ],
+        [
+          "Giada De Laurentiis / Alan Bersten",
+          "12/30",
+          "4.80 pts",
+          "Eliminated"
+        ],
+        [
+          "Jenna Dewan / Val Chmerkovskiy",
+          "21/30",
+          "8.40 pts",
+          "Safe"
+        ],
+        [
+          "Ezra Frech / Daniella Karagach",
+          "21/30",
+          "8.40 pts",
+          "Safe"
+        ],
+        [
+          "Amber Glenn / Pasha Pashkov",
+          "21/30",
+          "8.40 pts",
+          "Safe"
+        ],
+        [
+          "Taylor Hanson / Britt Stewart",
+          "15/30",
+          "6.00 pts",
+          "Safe"
+        ],
+        [
+          "Maura Higgins / Mark Ballas",
+          "19/30",
+          "7.60 pts",
+          "Safe"
+        ],
+        [
+          "Ciara Miller / Brandon Armstrong",
+          "18/30",
+          "7.20 pts",
+          "Safe"
+        ],
+        [
+          "Jackson Olson / Emma Slater",
+          "18/30",
+          "7.20 pts",
+          "Safe"
+        ],
+        [
+          "Guillermo Rodriguez / Witney Carson",
+          "12/30",
+          "4.80 pts",
+          "Safe"
+        ],
+        [
+          "Harry Shum Jr. / Jenna Johnson",
+          "18/30",
+          "7.20 pts",
+          "Safe"
+        ],
+        [
+          "Julia Stiles / Ezra Sosa",
+          "16/30",
+          "6.40 pts",
+          "Safe"
+        ],
+        [
+          "Connor Wood / Rylee Arnold",
+          "15/30",
+          "6.00 pts",
+          "Safe"
+        ]
+      ]
+    },
+    {
+      "week": "Week 1",
+      "rows": [
+        [
+          "Tatyana Ali / Jan Ravnik",
+          "12/30",
+          "4.00 pts",
+          "Safe"
+        ],
+        [
+          "Tyler Cameron / Sharna Burgess",
+          "17/30",
+          "5.67 pts",
+          "Safe"
+        ],
+        [
+          "Giada De Laurentiis / Alan Bersten",
+          "16/30",
+          "5.33 pts",
+          "Safe"
+        ],
+        [
+          "Jenna Dewan / Val Chmerkovskiy",
+          "19/30",
+          "6.33 pts",
+          "Safe"
+        ],
+        [
+          "Ezra Frech / Daniella Karagach",
+          "20/30",
+          "6.67 pts",
+          "Safe"
+        ],
+        [
+          "Amber Glenn / Pasha Pashkov",
+          "18/30",
+          "6.00 pts",
+          "Safe"
+        ],
+        [
+          "Taylor Hanson / Britt Stewart",
+          "16/30",
+          "5.33 pts",
+          "Safe"
+        ],
+        [
+          "Maura Higgins / Mark Ballas",
+          "21/30",
+          "7.00 pts",
+          "Safe"
+        ],
+        [
+          "Conner Leavitt / Adele Zaikman",
+          "12/30",
+          "4.00 pts",
+          "Eliminated"
+        ],
+        [
+          "Ciara Miller / Brandon Armstrong",
+          "15/30",
+          "5.00 pts",
+          "Safe"
+        ],
+        [
+          "Sarah Jane Nader / Hailey Bills",
+          "14/30",
+          "4.67 pts",
+          "Eliminated"
+        ],
+        [
+          "Jackson Olson / Emma Slater",
+          "15/30",
+          "5.00 pts",
+          "Safe"
+        ],
+        [
+          "Guillermo Rodriguez / Witney Carson",
+          "10/30",
+          "3.33 pts",
+          "Safe"
+        ],
+        [
+          "Harry Shum Jr. / Jenna Johnson",
+          "21/30",
+          "7.00 pts",
+          "Safe"
+        ],
+        [
+          "Julia Stiles / Ezra Sosa",
+          "18/30",
+          "6.00 pts",
+          "Safe"
+        ],
+        [
+          "Connor Wood / Rylee Arnold",
+          "16/30",
+          "5.33 pts",
+          "Safe"
+        ]
+      ]
+    }
+  ]
+}

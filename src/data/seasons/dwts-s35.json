@@ -1,0 +1,580 @@
+{
+  "show": {
+    "slug": "dwts",
+    "name": "Dancing with the Stars",
+    "unitLabel": "couple"
+  },
+  "season": {
+    "number": 35,
+    "title": "Season 35",
+    "copiesPerContestant": 2,
+    "rosterSize": {
+      "celebrity": 4,
+      "pro": 4
+    },
+    "scoringTemplate": "dwts-couple-score-x-round-value",
+    "status": "airing",
+    "finaleDate": "2026-11-24"
+  },
+  "units": [
+    {
+      "key": "ravnik",
+      "members": [
+        {
+          "key": "a01",
+          "name": "Tatyana Ali",
+          "role": "celebrity"
+        },
+        {
+          "key": "p01",
+          "name": "Jan Ravnik",
+          "role": "pro"
+        }
+      ]
+    },
+    {
+      "key": "burgess",
+      "members": [
+        {
+          "key": "a02",
+          "name": "Tyler Cameron",
+          "role": "celebrity"
+        },
+        {
+          "key": "p02",
+          "name": "Sharna Burgess",
+          "role": "pro"
+        }
+      ]
+    },
+    {
+      "key": "bersten",
+      "members": [
+        {
+          "key": "a03",
+          "name": "Giada De Laurentiis",
+          "role": "celebrity"
+        },
+        {
+          "key": "p03",
+          "name": "Alan Bersten",
+          "role": "pro"
+        }
+      ]
+    },
+    {
+      "key": "chmerkovskiy",
+      "members": [
+        {
+          "key": "a04",
+          "name": "Jenna Dewan",
+          "role": "celebrity"
+        },
+        {
+          "key": "p04",
+          "name": "Val Chmerkovskiy",
+          "role": "pro"
+        }
+      ]
+    },
+    {
+      "key": "karagach",
+      "members": [
+        {
+          "key": "a05",
+          "name": "Ezra Frech",
+          "role": "celebrity"
+        },
+        {
+          "key": "p05",
+          "name": "Daniella Karagach",
+          "role": "pro"
+        }
+      ]
+    },
+    {
+      "key": "pashkov",
+      "members": [
+        {
+          "key": "a06",
+          "name": "Amber Glenn",
+          "role": "celebrity"
+        },
+        {
+          "key": "p06",
+          "name": "Pasha Pashkov",
+          "role": "pro"
+        }
+      ]
+    },
+    {
+      "key": "stewart",
+      "members": [
+        {
+          "key": "a07",
+          "name": "Taylor Hanson",
+          "role": "celebrity"
+        },
+        {
+          "key": "p07",
+          "name": "Britt Stewart",
+          "role": "pro"
+        }
+      ]
+    },
+    {
+      "key": "ballas",
+      "members": [
+        {
+          "key": "a08",
+          "name": "Maura Higgins",
+          "role": "celebrity"
+        },
+        {
+          "key": "p08",
+          "name": "Mark Ballas",
+          "role": "pro"
+        }
+      ]
+    },
+    {
+      "key": "zaikman",
+      "members": [
+        {
+          "key": "a09",
+          "name": "Conner Leavitt",
+          "role": "celebrity"
+        },
+        {
+          "key": "p09",
+          "name": "Adele Zaikman",
+          "role": "pro"
+        }
+      ]
+    },
+    {
+      "key": "armstrong",
+      "members": [
+        {
+          "key": "a10",
+          "name": "Ciara Miller",
+          "role": "celebrity"
+        },
+        {
+          "key": "p10",
+          "name": "Brandon Armstrong",
+          "role": "pro"
+        }
+      ]
+    },
+    {
+      "key": "bills",
+      "members": [
+        {
+          "key": "a11",
+          "name": "Sarah Jane Nader",
+          "role": "celebrity"
+        },
+        {
+          "key": "p11",
+          "name": "Hailey Bills",
+          "role": "pro"
+        }
+      ]
+    },
+    {
+      "key": "slater",
+      "members": [
+        {
+          "key": "a12",
+          "name": "Jackson Olson",
+          "role": "celebrity"
+        },
+        {
+          "key": "p12",
+          "name": "Emma Slater",
+          "role": "pro"
+        }
+      ]
+    },
+    {
+      "key": "carson",
+      "members": [
+        {
+          "key": "a13",
+          "name": "Guillermo Rodriguez",
+          "role": "celebrity"
+        },
+        {
+          "key": "p13",
+          "name": "Witney Carson",
+          "role": "pro"
+        }
+      ]
+    },
+    {
+      "key": "johnson",
+      "members": [
+        {
+          "key": "a14",
+          "name": "Harry Shum Jr.",
+          "role": "celebrity"
+        },
+        {
+          "key": "p14",
+          "name": "Jenna Johnson",
+          "role": "pro"
+        }
+      ]
+    },
+    {
+      "key": "sosa",
+      "members": [
+        {
+          "key": "a15",
+          "name": "Julia Stiles",
+          "role": "celebrity"
+        },
+        {
+          "key": "p15",
+          "name": "Ezra Sosa",
+          "role": "pro"
+        }
+      ]
+    },
+    {
+      "key": "arnold",
+      "members": [
+        {
+          "key": "a16",
+          "name": "Connor Wood",
+          "role": "celebrity"
+        },
+        {
+          "key": "p16",
+          "name": "Rylee Arnold",
+          "role": "pro"
+        }
+      ]
+    }
+  ],
+  "episodes": [
+    {
+      "number": 1,
+      "name": "Premiere",
+      "roundValue": 10,
+      "maxScore": 30,
+      "unitsCompeting": 16,
+      "scheduleStatus": "actual",
+      "results": [
+        {
+          "unit": "ravnik",
+          "score": 12,
+          "eliminated": false
+        },
+        {
+          "unit": "burgess",
+          "score": 17,
+          "eliminated": false
+        },
+        {
+          "unit": "bersten",
+          "score": 16,
+          "eliminated": false
+        },
+        {
+          "unit": "chmerkovskiy",
+          "score": 19,
+          "eliminated": false
+        },
+        {
+          "unit": "karagach",
+          "score": 20,
+          "eliminated": false
+        },
+        {
+          "unit": "pashkov",
+          "score": 18,
+          "eliminated": false
+        },
+        {
+          "unit": "stewart",
+          "score": 16,
+          "eliminated": false
+        },
+        {
+          "unit": "ballas",
+          "score": 21,
+          "eliminated": false
+        },
+        {
+          "unit": "zaikman",
+          "score": 12,
+          "eliminated": true
+        },
+        {
+          "unit": "armstrong",
+          "score": 15,
+          "eliminated": false
+        },
+        {
+          "unit": "bills",
+          "score": 14,
+          "eliminated": true
+        },
+        {
+          "unit": "slater",
+          "score": 15,
+          "eliminated": false
+        },
+        {
+          "unit": "carson",
+          "score": 10,
+          "eliminated": false
+        },
+        {
+          "unit": "johnson",
+          "score": 21,
+          "eliminated": false
+        },
+        {
+          "unit": "sosa",
+          "score": 18,
+          "eliminated": false
+        },
+        {
+          "unit": "arnold",
+          "score": 16,
+          "eliminated": false
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "name": "Viral Hits Night",
+      "roundValue": 12,
+      "maxScore": 30,
+      "unitsCompeting": 14,
+      "scheduleStatus": "actual",
+      "results": [
+        {
+          "unit": "ravnik",
+          "score": 18,
+          "eliminated": false
+        },
+        {
+          "unit": "burgess",
+          "score": 16,
+          "eliminated": false
+        },
+        {
+          "unit": "bersten",
+          "score": 12,
+          "eliminated": true
+        },
+        {
+          "unit": "chmerkovskiy",
+          "score": 21,
+          "eliminated": false
+        },
+        {
+          "unit": "karagach",
+          "score": 21,
+          "eliminated": false
+        },
+        {
+          "unit": "pashkov",
+          "score": 21,
+          "eliminated": false
+        },
+        {
+          "unit": "stewart",
+          "score": 15,
+          "eliminated": false
+        },
+        {
+          "unit": "ballas",
+          "score": 19,
+          "eliminated": false
+        },
+        {
+          "unit": "armstrong",
+          "score": 18,
+          "eliminated": false
+        },
+        {
+          "unit": "slater",
+          "score": 18,
+          "eliminated": false
+        },
+        {
+          "unit": "carson",
+          "score": 12,
+          "eliminated": false
+        },
+        {
+          "unit": "johnson",
+          "score": 18,
+          "eliminated": false
+        },
+        {
+          "unit": "sosa",
+          "score": 16,
+          "eliminated": false
+        },
+        {
+          "unit": "arnold",
+          "score": 15,
+          "eliminated": false
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "name": "Yacht Rock Night",
+      "roundValue": 14,
+      "maxScore": 30,
+      "unitsCompeting": 13,
+      "scheduleStatus": "actual",
+      "results": [
+        {
+          "unit": "ravnik",
+          "score": 21,
+          "eliminated": false
+        },
+        {
+          "unit": "burgess",
+          "score": 17,
+          "eliminated": false
+        },
+        {
+          "unit": "chmerkovskiy",
+          "score": 21,
+          "eliminated": false
+        },
+        {
+          "unit": "karagach",
+          "score": 21,
+          "eliminated": false
+        },
+        {
+          "unit": "pashkov",
+          "score": 24,
+          "eliminated": false
+        },
+        {
+          "unit": "stewart",
+          "score": 18,
+          "eliminated": true
+        },
+        {
+          "unit": "ballas",
+          "score": 22,
+          "eliminated": false
+        },
+        {
+          "unit": "armstrong",
+          "score": 18,
+          "eliminated": false
+        },
+        {
+          "unit": "slater",
+          "score": 18,
+          "eliminated": false
+        },
+        {
+          "unit": "carson",
+          "score": 15,
+          "eliminated": false
+        },
+        {
+          "unit": "johnson",
+          "score": 24,
+          "eliminated": false
+        },
+        {
+          "unit": "sosa",
+          "score": 19,
+          "eliminated": false
+        },
+        {
+          "unit": "arnold",
+          "score": 20,
+          "eliminated": false
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "name": null,
+      "roundValue": 16,
+      "maxScore": 30,
+      "unitsCompeting": 12,
+      "scheduleStatus": "projected",
+      "results": []
+    },
+    {
+      "number": 5,
+      "name": null,
+      "roundValue": 18,
+      "maxScore": 30,
+      "unitsCompeting": 11,
+      "scheduleStatus": "projected",
+      "results": []
+    },
+    {
+      "number": 6,
+      "name": null,
+      "roundValue": 20,
+      "maxScore": 30,
+      "unitsCompeting": 10,
+      "scheduleStatus": "projected",
+      "results": []
+    },
+    {
+      "number": 7,
+      "name": null,
+      "roundValue": 23,
+      "maxScore": 30,
+      "unitsCompeting": 9,
+      "scheduleStatus": "projected",
+      "results": []
+    },
+    {
+      "number": 8,
+      "name": null,
+      "roundValue": 26,
+      "maxScore": 30,
+      "unitsCompeting": 8,
+      "scheduleStatus": "projected",
+      "results": []
+    },
+    {
+      "number": 9,
+      "name": null,
+      "roundValue": 29,
+      "maxScore": 30,
+      "unitsCompeting": 7,
+      "scheduleStatus": "projected",
+      "results": []
+    },
+    {
+      "number": 10,
+      "name": null,
+      "roundValue": 32,
+      "maxScore": 30,
+      "unitsCompeting": 6,
+      "scheduleStatus": "projected",
+      "results": []
+    },
+    {
+      "number": 11,
+      "name": null,
+      "roundValue": 36,
+      "maxScore": 30,
+      "unitsCompeting": 5,
+      "scheduleStatus": "projected",
+      "results": []
+    }
+  ]
+}

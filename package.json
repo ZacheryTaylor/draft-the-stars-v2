@@ -1,0 +1,36 @@
+{
+  "name": "draft-the-stars-v2",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "migrate:dry-run": "tsx scripts/migrate-legacy-league.ts --dry-run",
+    "seed:generate": "tsx scripts/generate-seed.ts",
+    "test:watch": "vitest",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build"
+  },
+  "dependencies": {
+    "next": "16.3.8",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.8",
+    "typescript": "^5",
+    "vitest": "4.1.11",
+    "tsx": "^4.20.0",
+    "@electric-sql/pglite": "^0.5.8"
+  },
+  "engines": {
+    "node": ">=20.9"
+  }
+}

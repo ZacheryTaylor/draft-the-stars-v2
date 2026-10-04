@@ -1,0 +1,152 @@
+{
+  "url": "https://zacherytaylor.github.io/dwts-draft/",
+  "capturedAt": "2026-10-04T13:41:24.025Z",
+  "scoresUpdatedAt": "2026-10-02T20:37:52.298Z",
+  "leader": "ChaChaChuck",
+  "rankings": [
+    {
+      "rank": "1",
+      "team": "ChaChaChuck",
+      "points": "171.40",
+      "weekPoints": "+73.27",
+      "alive": "6/8",
+      "mpp": "1371.40",
+      "roster": [
+        "Jenna Johnson",
+        "Jenna Dewan",
+        "Tyler Cameron",
+        "Sharna Burgess",
+        "Taylor Hanson (out)",
+        "Britt Stewart (out)",
+        "Tatyana Ali",
+        "Jan Ravnik"
+      ]
+    },
+    {
+      "rank": "2",
+      "team": "Mirrorball (Abby's Version)",
+      "points": "166.73",
+      "weekPoints": "+69.07",
+      "alive": "6/8",
+      "mpp": "1330.73",
+      "roster": [
+        "Harry Shum Jr.",
+        "Pasha Pashkov",
+        "Mark Ballas",
+        "Ezra Frech",
+        "Emma Slater",
+        "Taylor Hanson (out)",
+        "Hailey Bills (out)",
+        "Tatyana Ali"
+      ]
+    },
+    {
+      "rank": "3",
+      "team": "The Underdogs",
+      "points": "161.40",
+      "weekPoints": "+65.80",
+      "alive": "7/8",
+      "mpp": "1525.40",
+      "roster": [
+        "Val Chmerkovskiy",
+        "Jenna Johnson",
+        "Pasha Pashkov",
+        "Ezra Frech",
+        "Ciara Miller",
+        "Brandon Armstrong",
+        "Sarah Jane Nader (out)",
+        "Guillermo Rodriguez"
+      ]
+    },
+    {
+      "rank": "4",
+      "team": "Disko Kate",
+      "points": "158.00",
+      "weekPoints": "+64.87",
+      "alive": "6/8",
+      "mpp": "1322.00",
+      "roster": [
+        "Jenna Dewan",
+        "Amber Glenn",
+        "Ezra Sosa",
+        "Jackson Olson",
+        "Brandon Armstrong",
+        "Britt Stewart (out)",
+        "Sarah Jane Nader (out)",
+        "Jan Ravnik"
+      ]
+    },
+    {
+      "rank": "5",
+      "team": "JoWithTheFlow",
+      "points": "151.20",
+      "weekPoints": "+55.53",
+      "alive": "6/8",
+      "mpp": "1315.20",
+      "roster": [
+        "Harry Shum Jr.",
+        "Daniella Karagach",
+        "Maura Higgins",
+        "Sharna Burgess",
+        "Connor Wood",
+        "Alan Bersten (out)",
+        "Giada De Laurentiis (out)",
+        "Witney Carson"
+      ]
+    },
+    {
+      "rank": "6",
+      "team": "Mirrorball Occasionally",
+      "points": "143.53",
+      "weekPoints": "+58.80",
+      "alive": "7/8",
+      "mpp": "1507.53",
+      "roster": [
+        "Ezra Sosa",
+        "Rylee Arnold",
+        "Julia Stiles",
+        "Tyler Cameron",
+        "Emma Slater",
+        "Ciara Miller",
+        "Guillermo Rodriguez",
+        "Adele Zaikman (out)"
+      ]
+    },
+    {
+      "rank": "7",
+      "team": "Takes Two To Tango",
+      "points": "135.80",
+      "weekPoints": "+54.60",
+      "alive": "6/8",
+      "mpp": "1335.80",
+      "roster": [
+        "Val Chmerkovskiy",
+        "Julia Stiles",
+        "Rylee Arnold",
+        "Maura Higgins",
+        "Connor Wood",
+        "Hailey Bills (out)",
+        "Conner Leavitt (out)",
+        "Witney Carson"
+      ]
+    },
+    {
+      "rank": "8",
+      "team": "Carol's Mirrorball Mafia",
+      "points": "124.20",
+      "weekPoints": "+39.67",
+      "alive": "4/8",
+      "mpp": "924.20",
+      "roster": [
+        "Mark Ballas",
+        "Amber Glenn",
+        "Daniella Karagach",
+        "Jackson Olson",
+        "Alan Bersten (out)",
+        "Giada De Laurentiis (out)",
+        "Conner Leavitt (out)",
+        "Adele Zaikman (out)"
+      ]
+    }
+  ]
+}
