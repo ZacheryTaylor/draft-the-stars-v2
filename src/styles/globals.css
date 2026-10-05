@@ -100,8 +100,8 @@ form.stack { max-width: 520px; }
 
 /* landing */
 .hero { padding: var(--space-6) 0 var(--space-4); }
-.hero h1 { font-size: clamp(56px, 3rem + 4vw, 96px); }
-.hero .lede { font-size: var(--step-1); max-width: 640px; }
+.hero h1 { font-size: clamp(56px, 3rem + 4vw, 96px); line-height: 1.15; margin-bottom: 0.18em; padding-bottom: 0.05em; }
+.hero .lede { font-size: var(--step-1); max-width: 780px; text-wrap: pretty; }
 .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-3); }
 .feature { padding: var(--space-4); border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-sm); }
 .feature b { display: block; color: var(--accent-strong); margin-bottom: 4px; }
