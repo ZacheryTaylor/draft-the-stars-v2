@@ -64,7 +64,7 @@ export function SiteFooter({ r }: { r: Routes }) {
       <nav className="footer-links" aria-label="Legal and support" data-testid="footer-legal">
         {links.map((l) => <Link key={l.label} href={l.href}>{l.label}</Link>)}
       </nav>
-      Fan-made and not affiliated with the BBC, ABC, Disney, or any show, network or production company. No logos or photos: monograms only.
+      Draft the Stars is an independent fan game and is not affiliated with, sponsored by, or endorsed by Dancing with the Stars, ABC, Disney, BBC Studios, or any show, network or production company. No logos or photos: monograms only.
       <br />
       Free accounts · free to create a league · $5 platform fee per member (no prizes or payouts) · Draft the Stars v2 preview (mock data, placeholder services)
       <br />

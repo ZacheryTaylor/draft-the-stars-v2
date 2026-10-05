@@ -9,7 +9,7 @@ export function LandingView({ user, r }: { user: Profile | null; r: Routes }) {
   return (
     <>
       <section className="hero">
-        <p className="eyebrow">Any reality competition · draft night with friends</p>
+        <p className="eyebrow">Fantasy leagues, built for Dancing with the Stars fans</p>
         <h1>Draft the Stars</h1>
         <p className="lede muted">
           Draft the cast, score every episode, and watch the standings move. Built for ballroom, island, rose and
