@@ -1,11 +1,13 @@
 import Link from "next/link";
 import type { LeagueBundle } from "@/lib/data/types";
-import { draftReadiness } from "@/lib/billing";
+import { draftReadiness, paymentDeadlineInfo } from "@/lib/billing";
 import { billing } from "@/lib/billing/config";
 import { verifyEntry } from "@/lib/league/draft-order";
 import { DraftOrderEditor } from "@/components/DraftOrderEditor";
 import { FormMessage } from "@/components/FormMessage";
 import { Monogram } from "@/components/Monogram";
+import { InviteShare } from "@/components/InviteShare";
+import { DeadlineCountdown } from "@/components/DeadlineCountdown";
 import type { FormAction, Routes } from "./routes";
 
 export interface CommissionerActions {
@@ -15,6 +17,7 @@ export interface CommissionerActions {
   saveDraftOrder: (form: FormData) => Promise<void>;
   overrideScore: FormAction;
   clearScoreOverride: FormAction;
+  remindAllUnpaid?: FormAction;
 }
 
 export function CommissionerView({ b, slug, error, saved, act, r }: { b: LeagueBundle; slug: string; error?: string; saved?: string; act: CommissionerActions; r: Routes }) {
@@ -41,7 +44,8 @@ export function CommissionerView({ b, slug, error, saved, act, r }: { b: LeagueB
           <section className="stack">
             <h3>Invite code</h3>
             <p style={{ fontSize: 28, fontWeight: 700, letterSpacing: ".18em", margin: 0 }} className="strong">{invite?.code ?? "—"}</p>
-            <p className="hint">Share: {r.join(invite?.code)} · used {invite?.uses ?? 0} times · email invites via Resend are a placeholder.</p>
+            <p className="hint">Used {invite?.uses ?? 0} times · email invites via Resend are a placeholder.</p>
+            {invite?.code && <InviteShare code={invite.code} joinPath={r.join(invite.code)} />}
             <form action={act.regenerateInvite}><input type="hidden" name="slug" value={slug} /><button type="submit">Regenerate code</button></form>
           </section>
           <section className="stack">
@@ -52,8 +56,17 @@ export function CommissionerView({ b, slug, error, saved, act, r }: { b: LeagueB
               <div><span>Copies per dancer</span><b>{b.league.settings.copiesPerContestant}</b></div>
               <div><span>Draft</span><b>{b.league.settings.draftType} · {b.league.draftStatus.replace("_", " ")}</b></div>
               <div><span>Draft gate</span><b>{billing.draftGate === "all_slots_filled_and_paid" ? "all slots filled + paid" : "slots filled"}</b></div>
+              <div><span>Payment deadline</span><b>{paymentDeadlineInfo(b.season.premiereDate).deadline ?? "—"}</b></div>
             </div>
+            <DeadlineCountdown premiereDate={b.season.premiereDate} compact />
             {ready.ready ? <p className="notice">Ready: every slot is filled and paid.</p> : <p className="notice warn">Draft waiting: {ready.reasons.join("; ")}. <Link href={r.league(slug, "fees")}>Payment roster</Link></p>}
+            {act.remindAllUnpaid && !locked && ready.unpaidTeamIds.length > 0 && (
+              <form action={act.remindAllUnpaid} className="row">
+                <input type="hidden" name="slug" value={slug} />
+                <button type="submit" data-testid="nudge-unpaid-commish">Nudge unpaid</button>
+                <Link className="btn" href={r.league(slug, "fees")}>Open fees</Link>
+              </form>
+            )}
           </section>
         </div>
       </div>

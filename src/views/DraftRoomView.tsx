@@ -1,11 +1,13 @@
 import Link from "next/link";
 import type { LeagueBundle, Profile } from "@/lib/data/types";
 import { viewerRole } from "@/lib/data/league-view";
-import { draftReadiness } from "@/lib/billing";
+import { draftReadiness, paymentDeadlineInfo } from "@/lib/billing";
 import { checkPick, teamForPick, totalPicks } from "@/lib/league/draft";
 import { leagueSizing } from "@/lib/league/sizing";
 import { Monogram } from "@/components/Monogram";
 import { FormMessage } from "@/components/FormMessage";
+import { DeadlineCountdown } from "@/components/DeadlineCountdown";
+import { ShareDraftBoard } from "@/components/ShareDraftBoard";
 import type { FormAction, Routes } from "./routes";
 
 export function DraftRoomView({ b, user, slug, error, act, r, realtimeNote }: { b: LeagueBundle; user: Profile | null; slug: string; error?: string; act: { setDraftStatus: FormAction; makePick: FormAction }; r: Routes; realtimeNote: string }) {
@@ -19,13 +21,15 @@ export function DraftRoomView({ b, user, slug, error, act, r, realtimeNote }: { 
   const onClock = made < total ? teamForPick(made + 1, teams, rules.draftType) : null;
   const canPickNow = live && onClock && (v.isCommissioner || onClock.ownerId === user?.id);
   const ready = draftReadiness({ teamCount: league.settings.teamCount, teams: b.teams, payments: b.payments });
+  const deadline = paymentDeadlineInfo(b.season.premiereDate);
   const blocked = league.draftStatus === "not_started" && !ready.ready;
   const sizing = leagueSizing(b.units.length, teams.length);
   const perTeam = Object.values(rules.rosterSize).reduce<number>((a, c) => a + (c ?? 0), 0);
   const byId = new Map(b.contestants.map((c) => [c.id, c]));
+  const shareSummary = `${league.name}: draft complete · ${teams.length} teams · ${made} picks`;
   return (
     <>
-            <div className="card">
+      <div className="card">
         <div className="hero-head">
           <div>
             <p className="eyebrow"><span className="live-dot" aria-hidden="true" />{realtimeNote}</p>
@@ -44,22 +48,31 @@ export function DraftRoomView({ b, user, slug, error, act, r, realtimeNote }: { 
           )}
         </div>
         <FormMessage error={error} />
+        {league.draftStatus === "not_started" && (
+          <div className="row" style={{ marginBottom: 8 }}>
+            <DeadlineCountdown premiereDate={b.season.premiereDate} compact />
+            {deadline.passed && <span className="hint">Deadline passed — still waiting on spots/payments before the draft can start.</span>}
+          </div>
+        )}
         {blocked && <p className="notice warn"><b>Draft waiting:</b> {ready.reasons.join("; ")}. The draft starts once every slot is filled and paid. <Link href={r.league(slug, "fees")}>See the payment roster</Link></p>}
+        {league.draftStatus === "complete" && (
+          <ShareDraftBoard leagueName={league.name} leaguePath={r.league(slug, "draft")} summary={shareSummary} />
+        )}
         <p className="hint">Live updates use page refresh for now. Supabase Realtime (websockets, draft room only) is a placeholder.</p>
       </div>
 
       <div className="card table-scroll">
         <h3 style={{ marginTop: 0 }}>Board</h3>
-        <div className="board" style={{ ["--teams" as string]: teams.length }}>
+        <div className="board" data-draft-board style={{ ["--teams" as string]: teams.length }}>
           {teams.map((t) => <div key={t.id} className={`board-head ${onClock?.id === t.id && live ? "on-clock" : ""}`} title={t.name}>{t.name}</div>)}
-          {Array.from({ length: perTeam }, (_, r) =>
+          {Array.from({ length: perTeam }, (_, round) =>
             teams.map((t) => {
-              const p = b.picks.filter((x) => x.teamId === t.id).sort((x, y) => x.overall - y.overall)[r];
+              const p = b.picks.filter((x) => x.teamId === t.id).sort((x, y) => x.overall - y.overall)[round];
               const c = p ? byId.get(p.contestantId) : null;
               return c ? (
-                <div key={`${t.id}-${r}`} className={`slot ${c.role}`}><Monogram name={c.name} role={c.role} size="sm" initials={c.monogram} /><span>{c.name}</span></div>
+                <div key={`${t.id}-${round}`} className={`slot ${c.role}`}><Monogram name={c.name} role={c.role} size="sm" initials={c.monogram} /><span>{c.name}</span></div>
               ) : (
-                <div key={`${t.id}-${r}`} className="slot empty">Round {r + 1}</div>
+                <div key={`${t.id}-${round}`} className="slot empty">Round {round + 1}</div>
               );
             }),
           )}

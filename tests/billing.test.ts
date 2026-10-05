@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { billing, draftReadiness, FEE_COPY, formatCents, planCheckout, quote } from "@/lib/billing";
+import { billing, draftReadiness, FEE_COPY, formatCents, paymentDeadlineFromPremiere, paymentDeadlineInfo, planCheckout, quote } from "@/lib/billing";
 import { MockPaymentProvider } from "@/lib/billing/mock-provider";
 import { StripePaymentProvider } from "@/lib/billing/stripe-provider";
 import { getPaymentProvider, realProvider } from "@/lib/billing/get-provider";
@@ -178,5 +178,40 @@ describe("mock adapter: member pays / commissioner covers", () => {
     expect(await data.remindUnpaid("user:zach", leagueId, t[1])).toEqual({ to: "mirrorball_maven@example.com" });
     await expect(data.remindUnpaid("user:zach", leagueId, t[3])).rejects.toThrow(/open/);
     await expect(data.remindUnpaid("user:p1", leagueId, t[2])).rejects.toThrow(/commissioner/);
+  });
+});
+
+describe("paymentDeadlineFromPremiere", () => {
+  it("returns the calendar day before premiere", () => {
+    expect(paymentDeadlineFromPremiere("2026-10-20")).toBe("2026-10-19");
+    expect(paymentDeadlineFromPremiere("2026-03-01")).toBe("2026-02-28");
+    expect(paymentDeadlineFromPremiere("2024-03-01")).toBe("2024-02-29"); // leap year
+    expect(paymentDeadlineFromPremiere("2026-01-01")).toBe("2025-12-31");
+  });
+  it("returns null for missing or invalid dates", () => {
+    expect(paymentDeadlineFromPremiere(null)).toBeNull();
+    expect(paymentDeadlineFromPremiere(undefined)).toBeNull();
+    expect(paymentDeadlineFromPremiere("")).toBeNull();
+    expect(paymentDeadlineFromPremiere("not-a-date")).toBeNull();
+    expect(paymentDeadlineFromPremiere("10/20/2026")).toBeNull();
+  });
+});
+
+describe("paymentDeadlineInfo", () => {
+  it("counts down and marks passed relative to now", () => {
+    const before = paymentDeadlineInfo("2026-10-20", new Date(2026, 9, 5, 12, 0, 0)); // Oct 5
+    expect(before).toMatchObject({ deadline: "2026-10-19", passed: false, daysRemaining: 14 });
+    expect(before.label).toMatch(/14 days/);
+
+    const onDay = paymentDeadlineInfo("2026-10-20", new Date(2026, 9, 19, 9, 0, 0));
+    expect(onDay).toMatchObject({ deadline: "2026-10-19", passed: false, daysRemaining: 0 });
+    expect(onDay.label).toMatch(/today/);
+
+    const after = paymentDeadlineInfo("2026-10-20", new Date(2026, 9, 20, 12, 0, 0));
+    expect(after.passed).toBe(true);
+    expect(after.label).toMatch(/passed/);
+  });
+  it("handles a missing premiere", () => {
+    expect(paymentDeadlineInfo(null).label).toMatch(/No premiere/);
   });
 });

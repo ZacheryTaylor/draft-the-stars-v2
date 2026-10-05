@@ -8,6 +8,18 @@ import { COMPANY } from "@/lib/legal/company";
 import type { FormAction, Routes } from "./routes";
 
 export function SiteHeader({ user, r, logout, saveTheme }: { user: Profile | null; r: Routes; logout: FormAction; saveTheme: (t: ThemeId) => Promise<unknown> }) {
+  const links = user
+    ? [
+        { href: r.dashboard, label: "My leagues" },
+        { href: r.newLeague, label: "Create" },
+        { href: r.join(), label: "Join" },
+        { href: r.settings, label: "Settings" },
+      ]
+    : [
+        { href: r.home, label: "Home" },
+        { href: r.login(), label: "Log in" },
+        { href: r.signup, label: "Sign up" },
+      ];
   return (
     <header className="top">
       <div className="top-inner">
@@ -15,25 +27,16 @@ export function SiteHeader({ user, r, logout, saveTheme }: { user: Profile | nul
           <span className="kicker">Reality TV fantasy drafts</span>
           <span className="logo">Draft the Stars</span>
         </Link>
-        <nav className="main-nav" aria-label="Main">
-          <NavLinks
-            links={
-              user
-                ? [
-                    { href: r.dashboard, label: "My leagues" },
-                    { href: r.newLeague, label: "Create" },
-                    { href: r.join(), label: "Join" },
-                    { href: r.settings, label: "Settings" },
-                  ]
-                : [
-                    { href: r.home, label: "Home" },
-                    { href: r.login(), label: "Log in" },
-                    { href: r.signup, label: "Sign up" },
-                  ]
-            }
-          />
+        <nav className="main-nav desktop-nav" aria-label="Main">
+          <NavLinks links={links} />
         </nav>
         <div className="top-tools">
+          <details className="mobile-nav">
+            <summary className="mobile-nav-toggle" aria-label="Open menu">Menu</summary>
+            <nav className="mobile-nav-panel" aria-label="Main">
+              <NavLinks links={links} />
+            </nav>
+          </details>
           <ThemeSwitcher initial={user?.themePreset ?? null} save={saveTheme} />
           {user && (
             <form action={logout} className="user-chip">

@@ -14,6 +14,8 @@ export function createDemoState(): DbState {
   const plan = mapLegacyLeague({ season, scores, league, schedule } as unknown as LegacyData, { commissionerId: "user:zach", slug: GIRLS_SLUG });
   const L = plan.league;
   s.leagues.push({ ...L, name: `${L.name} (girls' league sample)` });
+  // Sample teams are filled for count consistency (dashboard filled/paid); only zach is a real member.
+  for (const t of plan.teams) t.ownerId = t.ownerId ?? `legacy:${t.id}`;
   s.teams.push(...plan.teams);
   s.picks.push(...plan.picks);
   s.invites.push(...plan.invites);

@@ -2,11 +2,13 @@ import Link from "next/link";
 import type { LeagueBundle, Profile } from "@/lib/data/types";
 import { toScoringInput } from "@/lib/data/to-scoring";
 import { viewerRole } from "@/lib/data/league-view";
+import { draftReadiness } from "@/lib/billing";
 import { DWTS_TEMPLATE } from "@/lib/scoring/templates";
 import { NavLinks } from "@/components/NavLinks";
 import { Monogram } from "@/components/Monogram";
 import { Standings } from "@/components/Standings";
 import { WeeklyScores } from "@/components/WeeklyScores";
+import { PreDraftChecklist } from "@/components/PreDraftChecklist";
 import type { Routes } from "./routes";
 
 /** League header + tab nav. Renders the private-league notice instead of children for non-members. */
@@ -47,9 +49,24 @@ export function LeagueShell({ b, user, r, children }: { b: LeagueBundle; user: P
   );
 }
 
-export function StandingsView({ b, user }: { b: LeagueBundle; user: Profile | null }) {
+export function StandingsView({ b, user, r }: { b: LeagueBundle; user: Profile | null; r: Routes }) {
   const v = viewerRole(b, user);
   if (!v.isMember && b.league.privacy !== "public") return null;
+  const drafted = b.league.draftStatus === "complete" || b.picks.length > 0;
+  if (!drafted) {
+    const ready = draftReadiness({ teamCount: b.league.settings.teamCount, teams: b.teams, payments: b.payments });
+    return (
+      <PreDraftChecklist
+        ready={ready}
+        premiereDate={b.season.premiereDate}
+        draftOrderSet={b.draftOrderLog.length > 0}
+        feesHref={r.league(b.league.slug, "fees")}
+        draftHref={r.league(b.league.slug, "draft")}
+        commissionerHref={r.league(b.league.slug, "commissioner")}
+        isCommissioner={v.isCommissioner}
+      />
+    );
+  }
   const input = toScoringInput(b, b.league.scoringTemplateSlug);
   const ownerNames = Object.fromEntries(b.teams.filter((t) => t.ownerId).map((t) => [t.id, b.members.find((m) => m.userId === t.ownerId)?.profile?.username ?? ""]));
   const unitOf = new Map(b.contestants.map((c) => [c.id, c.unitId]));

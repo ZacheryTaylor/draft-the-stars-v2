@@ -13,6 +13,8 @@ export function seasonFileFromLegacy(season: LegacySeason, scores: LegacyScores,
       rosterSize: { celebrity: season.rosterSize.amateur, pro: season.rosterSize.pro },
       scoringTemplate: DWTS_TEMPLATE.slug,
       status: "airing",
+      // PLACEHOLDER: demo premiere date for payment-deadline countdown (not an official schedule claim).
+      premiereDate: "2026-10-20",
       finaleDate: "2026-11-24",
     },
     units: season.couples.map((c) => ({

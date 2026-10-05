@@ -111,6 +111,10 @@ export function useDemoActions(page: string) {
       await demoData.remindUnpaid(me(), leagueId(str(f, "slug")).league.id, str(f, "teamId"));
       saved("reminder");
     }),
+    remindAllUnpaid: run(async (f) => {
+      await demoData.remindAllUnpaid(me(), leagueId(str(f, "slug")).league.id);
+      saved("reminder");
+    }),
     requestRefund: run(async (f) => {
       const p = await demoData.requestRefund(me(), leagueId(str(f, "slug")).league.id, str(f, "teamId"));
       if (p.providerPaymentId) await getPaymentProvider().refund(p.providerPaymentId, p.amountCents);

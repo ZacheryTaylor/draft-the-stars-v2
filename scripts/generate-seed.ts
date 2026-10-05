@@ -28,8 +28,8 @@ const lines: string[] = [
   "begin;",
   `insert into public.shows (slug, name, unit_label) values (${q(file.show.slug)}, ${q(file.show.name)}, ${q(file.show.unitLabel)}) on conflict (slug) do nothing;`,
   `insert into public.scoring_templates (slug, name, description, formula) values (${q(DWTS_TEMPLATE.slug)}, ${q(DWTS_TEMPLATE.name)}, ${q(DWTS_TEMPLATE.description)}, ${q(JSON.stringify({ type: "score_over_max_x_round_value", max_score: DWTS_TEMPLATE.rules.maxScore, round_values: DWTS_TEMPLATE.rules.roundValues, split: DWTS_TEMPLATE.split, max_possible: DWTS_TEMPLATE.maxPossible }))}::jsonb) on conflict (slug) do nothing;`,
-  `insert into public.seasons (show_id, number, title, copies_per_contestant, roster_size, default_scoring_template_id, status, finale_date)
-  select s.id, ${file.season.number}, ${q(file.season.title)}, ${file.season.copiesPerContestant}, ${q(JSON.stringify(file.season.rosterSize))}::jsonb, t.id, ${q(file.season.status)}, ${q(file.season.finaleDate)}::date
+  `insert into public.seasons (show_id, number, title, copies_per_contestant, roster_size, default_scoring_template_id, status, premiere_date, finale_date)
+  select s.id, ${file.season.number}, ${q(file.season.title)}, ${file.season.copiesPerContestant}, ${q(JSON.stringify(file.season.rosterSize))}::jsonb, t.id, ${q(file.season.status)}, ${q(file.season.premiereDate ?? null)}::date, ${q(file.season.finaleDate)}::date
   from public.shows s, public.scoring_templates t where s.slug = ${q(file.show.slug)} and t.slug = ${q(DWTS_TEMPLATE.slug)}
   on conflict (show_id, number) do nothing;`,
   `create temp table _season on commit drop as select se.id from public.seasons se join public.shows sh on sh.id = se.show_id where sh.slug = ${q(file.show.slug)} and se.number = ${file.season.number};`,

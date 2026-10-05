@@ -2,13 +2,15 @@ import Link from "next/link";
 import type { LeagueBundle, Profile } from "@/lib/data/types";
 import type { Routes } from "./routes";
 import { viewerRole } from "@/lib/data/league-view";
-import { activeSlotPayment as slotPayment, billing, draftReadiness, FEE_COPY, formatCents } from "@/lib/billing";
+import { activeSlotPayment as slotPayment, billing, draftReadiness, FEE_COPY, formatCents, paymentDeadlineInfo } from "@/lib/billing";
 import { FormMessage } from "@/components/FormMessage";
 import { PaymentRoster, type RosterRow } from "@/components/PaymentRoster";
+import { DeadlineCountdown } from "@/components/DeadlineCountdown";
 
 export interface FeesActions {
   checkoutSlots: (form: FormData) => Promise<void>;
   remindUnpaid: (form: FormData) => Promise<void>;
+  remindAllUnpaid: (form: FormData) => Promise<void>;
   requestRefund: (form: FormData) => Promise<void>;
   removeMember: (form: FormData) => Promise<void>;
 }
@@ -55,10 +57,12 @@ export function FeesView({ b, user, slug, sp, act, stripeLabel, mockLabel, r }: 
     };
   });
   const ready = draftReadiness({ teamCount: b.league.settings.teamCount, teams: b.teams, payments: b.payments });
+  const deadline = paymentDeadlineInfo(b.season.premiereDate);
   const mine = rows.find((r) => r.isMe);
   const locked = b.league.draftStatus !== "not_started";
-    const history = b.payments.filter((p) => p.status !== "unpaid" && p.status !== "waived").sort((x, y) => (y.paidAt ?? y.createdAt).localeCompare(x.paidAt ?? x.createdAt));
+  const history = b.payments.filter((p) => p.status !== "unpaid" && p.status !== "waived").sort((x, y) => (y.paidAt ?? y.createdAt).localeCompare(x.paidAt ?? x.createdAt));
   const teamName = (id: string) => b.teams.find((t) => t.id === id)?.name ?? "Team";
+  const unpaidMembers = rows.filter((r) => r.status === "unpaid" && r.memberId).length;
 
   return (
     <>
@@ -105,15 +109,28 @@ export function FeesView({ b, user, slug, sp, act, stripeLabel, mockLabel, r }: 
             <div>
               <b>Draft gate</b>
               {ready.ready ? <p className="hint" style={{ margin: 0 }}>Every slot is filled and paid. The commissioner can start the draft.</p> : (
-                <ul className="hint" style={{ margin: "4px 0 0", paddingLeft: 18 }}>{ready.reasons.map((r) => <li key={r}>{r}</li>)}</ul>
+                <ul className="hint" style={{ margin: "4px 0 0", paddingLeft: 18 }}>{ready.reasons.map((reason) => <li key={reason}>{reason}</li>)}</ul>
               )}
+              {deadline.passed && !locked && <p className="hint" style={{ marginTop: 6 }}><b>Deadline passed.</b> {deadline.label}</p>}
+            </div>
+            <div>
+              <b>Payment deadline</b>
+              <DeadlineCountdown premiereDate={b.season.premiereDate} />
             </div>
           </div>
         </div>
       </div>
 
       <div className="card">
-        <h3 style={{ marginTop: 0 }}>Payment roster</h3>
+        <div className="hero-head">
+          <h3 style={{ marginTop: 0 }}>Payment roster</h3>
+          {v.isCommissioner && !locked && unpaidMembers > 0 && (
+            <form action={act.remindAllUnpaid}>
+              <input type="hidden" name="slug" value={slug} />
+              <button type="submit" data-testid="nudge-unpaid">Nudge unpaid ({unpaidMembers})</button>
+            </form>
+          )}
+        </div>
         {v.isCommissioner && !locked && (
           <p className="muted" style={{ marginTop: 0 }}>
             Cover other members (or open slots, which stay paid for whoever claims them) in one checkout: select slots, then <b>Pay for selected</b>, or <b>Pay for all unpaid</b>. {FEE_COPY.cover}

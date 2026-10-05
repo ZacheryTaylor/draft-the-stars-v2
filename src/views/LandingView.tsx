@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { Profile } from "@/lib/data/types";
 import { billing, formatCents } from "@/lib/billing";
-import { Monogram } from "@/components/Monogram";
 import { LandingPreview } from "@/components/LandingPreview";
 import { landingPreviewData } from "@/lib/data/sample-preview";
 import type { Routes } from "./routes";
@@ -36,9 +35,15 @@ export function LandingView({ user, r }: { user: Profile | null; r: Routes }) {
             <p className="eyebrow">How it works</p>
             <h2>Draft · Score · Celebrate</h2>
           </div>
-          <div className="row" aria-hidden="true">
-            <Monogram name="Celebrity Star" size="lg" />
-            <Monogram name="Pro Partner" role="pro" size="lg" />
+          <div className="pick-legend" aria-label="Draft pick types">
+            <div className="pick-legend-item">
+              <span className="slot celebrity pick-legend-chip">Celebrity</span>
+              <span className="hint">Celebrity pick</span>
+            </div>
+            <div className="pick-legend-item">
+              <span className="slot pro pick-legend-chip">Pro</span>
+              <span className="hint">Pro pick</span>
+            </div>
           </div>
         </div>
         <div className="feature-grid">

@@ -39,7 +39,7 @@ export function DashboardView({ user, leagues, r }: { user: Profile; leagues: Le
             </div>
             <div className="row">
               <span className="pill">{l.role === "player" ? "Player" : "Commissioner"}</span>
-              <span className="pill">{l.memberCount}/{l.league.settings.teamCount} members</span>
+              <span className="pill">{l.filledSlots}/{l.league.settings.teamCount} filled</span>
               <span className={`pill ${l.paidSlots === l.league.settings.teamCount ? "" : "pill-gold"}`}>{l.paidSlots}/{l.league.settings.teamCount} paid</span>
               <span className="pill">Draft: {l.league.draftStatus.replace("_", " ")}</span>
             </div>

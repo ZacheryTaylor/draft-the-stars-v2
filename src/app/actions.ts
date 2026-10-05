@@ -128,6 +128,16 @@ export async function remindUnpaid(form: FormData) {
   redirect(`${path}?saved=reminder`);
 }
 
+export async function remindAllUnpaid(form: FormData) {
+  const slug = str(form, "slug");
+  const path = `/leagues/${slug}/billing`;
+  const user = await requireUser(path);
+  const { league } = await leagueFor(slug);
+  await run(path, () => getData().remindAllUnpaid(user.id, league.id));
+  revalidatePath(path);
+  redirect(`${path}?saved=reminder`);
+}
+
 export async function requestRefund(form: FormData) {
   const slug = str(form, "slug");
   const path = `/leagues/${slug}/billing`;

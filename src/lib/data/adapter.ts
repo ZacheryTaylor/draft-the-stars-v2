@@ -19,11 +19,13 @@ import type {
 export interface LeagueSummary {
   league: League;
   role: MemberRole;
+  /** Filled team slots (owners assigned). Same source as draftReadiness.filledSlots. */
   memberCount: number;
+  filledSlots: number;
   teamName: string | null;
   seasonTitle: string;
   showName: string;
-  /** Slots paid or covered (or waived) / total slots. */
+  /** Slots paid or covered (or waived). Same source as draftReadiness.paidSlots. */
   paidSlots: number;
   myPaymentStatus: SlotPayment["status"] | null;
 }
@@ -75,6 +77,8 @@ export interface DataAdapter {
   markSlotsPaid(input: MarkSlotsPaidInput): Promise<number>;
   /** Commissioner: placeholder reminder to an unpaid member (email stub). */
   remindUnpaid(userId: string, leagueId: string, teamId: string): Promise<{ to: string | null }>;
+  /** Commissioner: nudge every unpaid member (email stub). */
+  remindAllUnpaid(userId: string, leagueId: string): Promise<{ count: number }>;
   /** Commissioner, before the draft: placeholder refund of a slot back to whoever paid it. */
   requestRefund(userId: string, leagueId: string, teamId: string): Promise<SlotPayment>;
   /** Commissioner, before the draft: remove a member (e.g. unpaid) so the slot can be re-invited. */

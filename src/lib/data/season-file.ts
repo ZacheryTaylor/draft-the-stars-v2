@@ -11,6 +11,8 @@ export interface SeasonFile {
     rosterSize: Partial<Record<ContestantRole, number>>;
     scoringTemplate: string;
     status: "upcoming" | "airing" | "finished";
+    /** ISO date (YYYY-MM-DD). Optional; payment deadline is the day before. */
+    premiereDate?: string | null;
     finaleDate: string | null;
   };
   units: { key: string; members: { key: string; name: string; role: ContestantRole }[] }[];
@@ -41,6 +43,7 @@ export function seasonBundleFromFile(file: SeasonFile): SeasonBundle {
       rosterSize: file.season.rosterSize,
       scoringTemplateSlug: file.season.scoringTemplate,
       status: file.season.status,
+      premiereDate: file.season.premiereDate ?? null,
       finaleDate: file.season.finaleDate,
     },
     units: file.units.map((u, i) => ({

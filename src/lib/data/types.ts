@@ -28,6 +28,8 @@ export interface Season {
   rosterSize: Partial<Record<ContestantRole, number>>;
   scoringTemplateSlug: string;
   status: "upcoming" | "airing" | "finished";
+  /** ISO date (YYYY-MM-DD). Payment deadline = day before this. */
+  premiereDate: string | null;
   finaleDate: string | null;
 }
 export interface ContestantUnit { id: string; seasonId: string; key: string; label: string; sortOrder: number }

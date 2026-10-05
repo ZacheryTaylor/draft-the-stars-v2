@@ -83,3 +83,61 @@ export function planCheckout(slots: SlotForCheckout[], selection: string[] | "al
 export function activeSlotPayment(payments: SlotPayment[], teamId: string): SlotPayment | undefined {
   return payments.find((p) => p.teamId === teamId && (p.status === "unpaid" || p.status === "paid" || p.status === "waived"));
 }
+
+/** Calendar date helpers for payment deadlines (local noon avoids DST edge cases). */
+function parseYmd(ymd: string): Date {
+  const [y, m, d] = ymd.split("-").map(Number);
+  return new Date(y, m - 1, d, 12, 0, 0, 0);
+}
+
+function formatYmd(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+/**
+ * Payment deadline = calendar day before the season premiere.
+ * Returns null when premiereDate is missing/invalid.
+ */
+export function paymentDeadlineFromPremiere(premiereDate: string | null | undefined): string | null {
+  if (!premiereDate || !/^\d{4}-\d{2}-\d{2}$/.test(premiereDate)) return null;
+  const prem = parseYmd(premiereDate);
+  if (Number.isNaN(prem.getTime())) return null;
+  prem.setDate(prem.getDate() - 1);
+  return formatYmd(prem);
+}
+
+export interface DeadlineInfo {
+  premiereDate: string | null;
+  deadline: string | null;
+  /** End of the deadline day (local), for countdown math. */
+  deadlineEnd: Date | null;
+  passed: boolean;
+  /** Whole days remaining (0 on deadline day before end-of-day; negative if passed). */
+  daysRemaining: number | null;
+  label: string;
+}
+
+/** Snapshot of payment-deadline state relative to `now` (defaults to Date.now()). Uses calendar days. */
+export function paymentDeadlineInfo(premiereDate: string | null | undefined, now: Date = new Date()): DeadlineInfo {
+  const deadline = paymentDeadlineFromPremiere(premiereDate);
+  if (!deadline) {
+    return { premiereDate: premiereDate ?? null, deadline: null, deadlineEnd: null, passed: false, daysRemaining: null, label: "No premiere date set" };
+  }
+  const end = parseYmd(deadline);
+  end.setHours(23, 59, 59, 999);
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const deadlineDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+  const daysRemaining = Math.round((deadlineDay.getTime() - today.getTime()) / 86_400_000);
+  const passed = now.getTime() > end.getTime();
+  const label = passed
+    ? `Payment deadline passed (${deadline})`
+    : daysRemaining === 0
+      ? `Payment deadline is today (${deadline})`
+      : daysRemaining === 1
+        ? `Payment deadline tomorrow (${deadline})`
+        : `Payment deadline in ${daysRemaining} days (${deadline})`;
+  return { premiereDate: premiereDate ?? null, deadline, deadlineEnd: end, passed, daysRemaining, label };
+}

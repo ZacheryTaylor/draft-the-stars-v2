@@ -32,7 +32,7 @@ export function ThemeSwitcher({ initial, save }: { initial: ThemeId | null; save
     <details className="theme-switcher" ref={ref} onKeyDown={(e) => { if (e.key === "Escape") ref.current?.removeAttribute("open"); }}>
       <summary aria-label={`Theme: ${preset.label}. Change colour theme`} data-testid="theme-menu">
         <span className="ts-swatch" aria-hidden="true" style={{ background: `linear-gradient(135deg, ${preset.tokens.accent} 0 50%, ${preset.tokens.bg} 50%)` }} />
-        Theme: {preset.label}
+        <span className="ts-label">Theme: {preset.label}</span>
       </summary>
       <div className="ts-panel" role="radiogroup" aria-label="Colour theme">
         {THEME_PRESETS.map((p) => (

@@ -126,16 +126,21 @@ export class MockAdapter implements DataAdapter {
       .map((m) => {
         const l = league(db, m.leagueId);
         const season = db.seasons.find((s) => s.id === l.seasonId)!;
+        const teams = db.teams.filter((t) => t.leagueId === l.id);
+        const payments = db.payments.filter((p) => p.leagueId === l.id);
+        const ready = draftReadiness({ teamCount: l.settings.teamCount, teams, payments });
         return {
           league: l,
           role: m.role,
-          memberCount: db.leagueMembers.filter((x) => x.leagueId === l.id).length,
-          teamName: db.teams.find((t) => t.leagueId === l.id && t.ownerId === userId)?.name ?? null,
+          /** Filled team slots (same source as draftReadiness / Fees / Commissioner). */
+          memberCount: ready.filledSlots,
+          filledSlots: ready.filledSlots,
+          teamName: teams.find((t) => t.ownerId === userId)?.name ?? null,
           seasonTitle: season.title,
           showName: db.shows.find((s) => s.id === season.showId)?.name ?? "",
-          paidSlots: db.teams.filter((t) => t.leagueId === l.id && ["paid", "waived"].includes(slotPayment(db.payments, t.id)?.status ?? "")).length,
+          paidSlots: ready.paidSlots,
           myPaymentStatus: (() => {
-            const t = db.teams.find((x) => x.leagueId === l.id && x.ownerId === userId);
+            const t = teams.find((x) => x.ownerId === userId);
             return t ? (slotPayment(db.payments, t.id)?.status ?? null) : null;
           })(),
         };
@@ -373,6 +378,20 @@ export class MockAdapter implements DataAdapter {
     if (!p.memberId) throw new DataError("That slot is open; share the invite code instead");
     p.remindedAt = now();
     return { to: db.profiles.find((x) => x.id === p.memberId)?.email ?? null };
+  }
+  async remindAllUnpaid(userId: string, leagueId: string) {
+    const db = this.db;
+    requireCommissioner(db, leagueId, userId);
+    const at = now();
+    let count = 0;
+    for (const t of db.teams.filter((x) => x.leagueId === leagueId)) {
+      const p = slotPayment(db.payments, t.id);
+      if (p && p.status === "unpaid" && p.memberId) {
+        p.remindedAt = at;
+        count++;
+      }
+    }
+    return { count };
   }
   async requestRefund(userId: string, leagueId: string, teamId: string) {
     // TODO(refunds): placeholder. The provider refund goes back to whoever paid (payer_id), never to the member.

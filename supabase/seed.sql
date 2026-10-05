@@ -3,8 +3,8 @@
 begin;
 insert into public.shows (slug, name, unit_label) values ('dwts', 'Dancing with the Stars', 'couple') on conflict (slug) do nothing;
 insert into public.scoring_templates (slug, name, description, formula) values ('dwts-couple-score-x-round-value', 'Ballroom: couple score ÷ 30 × round value', 'Each drafted celebrity and each drafted pro earns (couple score ÷ 30) × that week''s round value. Max Possible assumes perfect scores for the couples still dancing, capped by how many couples remain each week.', '{"type":"score_over_max_x_round_value","max_score":30,"round_values":[10,12,14,16,18,20,23,26,29,32,36],"split":"full_each","max_possible":"capped_by_remaining"}'::jsonb) on conflict (slug) do nothing;
-insert into public.seasons (show_id, number, title, copies_per_contestant, roster_size, default_scoring_template_id, status, finale_date)
-  select s.id, 35, 'Season 35', 2, '{"celebrity":4,"pro":4}'::jsonb, t.id, 'airing', '2026-11-24'::date
+insert into public.seasons (show_id, number, title, copies_per_contestant, roster_size, default_scoring_template_id, status, premiere_date, finale_date)
+  select s.id, 35, 'Season 35', 2, '{"celebrity":4,"pro":4}'::jsonb, t.id, 'airing', '2026-10-20'::date, '2026-11-24'::date
   from public.shows s, public.scoring_templates t where s.slug = 'dwts' and t.slug = 'dwts-couple-score-x-round-value'
   on conflict (show_id, number) do nothing;
 create temp table _season on commit drop as select se.id from public.seasons se join public.shows sh on sh.id = se.show_id where sh.slug = 'dwts' and se.number = 35;
