@@ -16,7 +16,6 @@ export interface LegalDoc {
 }
 
 const EMAIL = `[${C.supportEmail}](mailto:${C.supportEmail})`;
-const MAIL = `${C.legalName}, ${C.address}`;
 
 const terms: LegalDoc = {
   slug: "terms",
@@ -189,7 +188,7 @@ We may update these Terms. We will post the new version here with a new effectiv
 
 ## 22. Contact {#contact}
 
-${C.legalName}, ${C.address}. Email: ${EMAIL}. See [Contact & Support](/contact).
+${C.legalName}. Email: ${EMAIL}. See [Contact & Support](/contact).
 `,
 };
 
@@ -502,9 +501,9 @@ ${C.product} is operated by **${C.legalName}**, ${C.entity}.
 | Copyright (DMCA) notice | Email ${EMAIL} with the subject "DMCA Notice," or mail our Copyright Agent. See [Copyright and IP complaints](/terms#copyright) |
 | A parent or guardian asking about a child's or teen's account | Email ${EMAIL}. See [Children and teens](/privacy#children) |
 
-## Mailing address for legal notices {#mail}
+## Legal notices {#mail}
 
-${C.legalName}, Attn: Legal / Copyright Agent, ${C.address}
+Send legal notices to ${EMAIL}. For copyright notices, the mailing address of our designated Copyright Agent is listed in [Copyright and IP complaints](/terms#copyright).
 
 ## Policies {#policies}
 
