@@ -35,16 +35,6 @@ export function LandingView({ user, r }: { user: Profile | null; r: Routes }) {
             <p className="eyebrow">How it works</p>
             <h2>Draft · Score · Celebrate</h2>
           </div>
-          <div className="pick-legend" aria-label="Draft pick types">
-            <div className="pick-legend-item">
-              <span className="slot celebrity pick-legend-chip">Celebrity</span>
-              <span className="hint">Celebrity pick</span>
-            </div>
-            <div className="pick-legend-item">
-              <span className="slot pro pick-legend-chip">Pro</span>
-              <span className="hint">Pro pick</span>
-            </div>
-          </div>
         </div>
         <div className="feature-grid">
           <div className="feature"><b>Snake draft, live</b>Everyone drafts in one room. Celebrities and pros are separate picks with fair roster slots.</div>
