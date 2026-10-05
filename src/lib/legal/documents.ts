@@ -353,7 +353,7 @@ We may update this policy. We will post the new version here with a new effectiv
 
 ## 14. Contact {#contact}
 
-Questions or requests: ${EMAIL}, or by mail to ${MAIL}. See [Contact & Support](/contact).
+Questions or requests: ${EMAIL}. See [Contact & Support](/contact).
 `,
 };
 
@@ -419,7 +419,7 @@ Accounts are free, so there is nothing to cancel to stop being charged; the fee 
 
 ## 9. Contact {#contact}
 
-Refund questions: ${EMAIL} (subject line "Refund"). Mail: ${MAIL}.
+Refund questions: ${EMAIL} (subject line "Refund").
 `,
 };
 
@@ -471,7 +471,7 @@ ${C.product} is fan-made and **not affiliated with, endorsed by, or sponsored by
 
 ## 8. Questions {#contact}
 
-Email ${EMAIL}. Mail: ${MAIL}.
+Email ${EMAIL}.
 `,
 };
 
