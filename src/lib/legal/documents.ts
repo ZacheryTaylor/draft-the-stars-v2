@@ -122,8 +122,9 @@ We respect intellectual property rights and respond to notices under the Digital
 
 If you believe content on the Service infringes your copyright, send a notice to our designated agent:
 
-- **Copyright Agent:** ${C.legalName}, Attn: Copyright Agent, ${C.address}
+- **Copyright Agent:** Zachery Taylor, ${C.legalName}, Attn: Copyright Agent, ${C.address}
 - **Email:** ${EMAIL} (subject line "DMCA Notice")
+- **U.S. Copyright Office registration:** DMCA-1081942 (listed in the [DMCA Designated Agent Directory](https://dmca.copyright.gov/osp/))
 
 Your notice must include:
 
