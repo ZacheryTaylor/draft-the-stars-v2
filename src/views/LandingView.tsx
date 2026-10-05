@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { Profile } from "@/lib/data/types";
 import { billing, formatCents } from "@/lib/billing";
 import { Monogram } from "@/components/Monogram";
+import { LandingPreview } from "@/components/LandingPreview";
+import { landingPreviewData } from "@/lib/data/sample-preview";
 import type { Routes } from "./routes";
 
 export function LandingView({ user, r }: { user: Profile | null; r: Routes }) {
@@ -48,6 +50,8 @@ export function LandingView({ user, r }: { user: Profile | null; r: Routes }) {
           <div className="feature"><b>Simple pricing</b>Free accounts, free to create a league. Each member pays a one-time {formatCents(billing.pricePerMemberCents)} platform fee, or the commissioner covers it. No prizes or payouts.</div>
         </div>
       </section>
+
+      <LandingPreview data={landingPreviewData()} />
     </>
   );
 }
