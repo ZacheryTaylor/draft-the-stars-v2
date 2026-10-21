@@ -57,6 +57,7 @@ Accounts are free and creating a league is free. Each league member pays a one-t
 ## 5. The $5 platform fee {#platform-fee}
 
 - Each member pays a **one-time $5 (USD) platform fee per league**. It is charged once per league spot, not monthly.
+- The fee is a fixed **platform-use fee** charged by ZT, LLC, the operator of the Service, and paid through Stripe. **It is not a wager, bet, or prize entry**, and paying it does not enter you into any contest for money or prizes.
 - The commissioner can pay the fee for some or all members, including open spots.
 - **The draft cannot start until every spot in the league is filled and paid.**
 - Fees pay for running the platform only: hosting, the database, email, score updates, support, development, and payment processing.
@@ -67,6 +68,8 @@ Accounts are free and creating a league is free. Each league member pays a one-t
 ## 6. No prizes, no gambling, and money between members {#no-prizes}
 
 We do not award prizes, cash, gift cards, or anything else of value to anyone for how they finish in a league. Winning a league earns bragging rights only.
+
+If league members choose to offer any prize, it is arranged entirely by the league members themselves and is **never funded from platform fees**.
 
 Any money that league members choose to collect, owe, or pay each other happens **off-platform** and is **not our responsibility**. We do not hold, track, collect, distribute, or enforce it, and we will not settle disputes about it. You are responsible for following the laws that apply to you.
 
