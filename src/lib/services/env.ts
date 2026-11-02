@@ -31,7 +31,7 @@ export interface ServiceStatus { name: string; connected: boolean; envVars: stri
 export function serviceStatus(): ServiceStatus[] {
   return [
     { name: "Supabase (database, auth, realtime)", connected: Boolean(env.supabase.url && env.supabase.anonKey), envVars: ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_DB_URL"], note: "Using the in-memory mock data layer." },
-    { name: "Stripe (payments)", connected: false, envVars: ["STRIPE_SECRET_KEY", "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_ID"], note: "Mock provider only." },
+    { name: "Stripe (payments)", connected: Boolean(env.stripe.secretKey && env.stripe.publishableKey && env.stripe.webhookSecret), envVars: ["STRIPE_SECRET_KEY", "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_ID"], note: "Mock provider unless all Stripe test-mode keys are set; routes return 503 otherwise." },
     { name: "Resend (email)", connected: false, envVars: ["RESEND_API_KEY", "EMAIL_FROM"], note: "Emails are logged, not sent." },
     { name: "Sentry (errors)", connected: false, envVars: ["NEXT_PUBLIC_SENTRY_DSN", "SENTRY_AUTH_TOKEN", "SENTRY_ORG", "SENTRY_PROJECT"], note: "Errors are logged to the server console." },
   ];
