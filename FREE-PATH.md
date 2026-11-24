@@ -7,6 +7,7 @@ No recurring paid infrastructure is used or required for anything below.
 - Shareable static demo on GitHub Pages (localStorage): https://zacherytaylor.github.io/draft-the-stars-v2/ (deploys from `main` only).
 - SQL schema/migrations verified locally with **PGlite** in tests (`npm test`) — no hosted DB.
 - Stripe Checkout **test mode** (branch `stripe-checkout`): checkout route, signed webhook, idempotent paid marking. With no keys set, routes return 503 and the app stays on the mock provider.
+- League-fee checkout flow (branch `checkout-flow-staging`): create league -> fee summary -> checkout page (order summary + clearly labelled simulated test card) -> success/cancel -> draft gate unlocks when every slot is filled and paid. Works in both the server app and the static demo with no keys.
 - Terms (platform-use fee wording), Privacy, Refunds, Fees disclosure pages.
 
 ## Blocked until Zach approves paid/hosted services

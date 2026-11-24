@@ -60,7 +60,7 @@ nav.main-nav a[aria-current="page"] { color: var(--on-accent); background: linea
 .user-chip { display: inline-flex; align-items: center; gap: 6px; }
 .row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
 .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-4); }
-.stack { display: grid; gap: var(--space-3); }
+.stack { display: grid; gap: var(--space-3); align-content: start; }
 
 /* buttons & inputs */
 button, .btn {
@@ -327,3 +327,37 @@ input[type="checkbox"]:disabled { cursor: not-allowed; }
 .theme-tile-bar { position: absolute; inset: 0 0 auto 0; height: 8px; }
 .theme-tile small { font-size: 11px; opacity: 0.8; font-weight: 500; }
 @media (max-width: 640px) { .preview-body { padding: var(--space-3); max-height: 560px; } }
+
+/* checkout flow (fee summary -> checkout -> success/cancel) */
+.fee-summary { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-4); align-items: end; margin: var(--space-3) 0; padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.fee-summary .receipt { max-width: 460px; }
+.fee-summary-actions { display: grid; gap: var(--space-2); justify-items: stretch; min-width: 220px; }
+.fee-summary-actions button { width: 100%; }
+.checkout-result { margin: var(--space-3) 0; border-style: solid; }
+.checkout-result.ok { border-color: var(--accent-strong); background: var(--accent-soft); }
+.checkout-check { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; color: var(--on-accent); background: var(--accent-strong); font-size: 13px; margin-right: 2px; }
+.checkout-card { max-width: 980px; margin-inline: auto; }
+.checkout-top { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); margin-bottom: var(--space-3); }
+.checkout-top h2 { margin: 2px 0 4px; }
+.checkout-badge { font-size: 12px; white-space: nowrap; }
+.checkout-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: var(--space-5); align-items: start; }
+.checkout-summary h3, .checkout-pay h3 { margin: 0 0 var(--space-2); }
+.checkout-lines { list-style: none; margin: 0 0 var(--space-2); padding: 0; display: grid; gap: 6px; max-height: 340px; overflow: auto; }
+.checkout-lines li { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
+.checkout-line-name { display: grid; min-width: 0; }
+.checkout-line-name b, .checkout-line-name small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.checkout-line-name small { color: var(--muted); font-weight: 600; }
+.checkout-receipt { max-width: none; }
+.checkout-pay { display: grid; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-alt); }
+.checkout-sim { margin: 0; font-size: var(--step--1); }
+.checkout-card-fields { display: grid; gap: var(--space-2); margin: 0; padding: 0; border: 0; min-width: 0; }
+.checkout-card-fields input[readonly] { font-variant-numeric: tabular-nums; letter-spacing: .04em; background: var(--surface); color: var(--ink); cursor: default; }
+.checkout-card-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+.checkout-pay-btn, .checkout-cancel { width: 100%; justify-content: center; text-align: center; }
+.checkout-pay-btn { min-height: 48px; font-size: 16px; }
+@media (max-width: 760px) {
+  .checkout-grid { grid-template-columns: 1fr; gap: var(--space-4); }
+  .fee-summary { grid-template-columns: 1fr; align-items: stretch; }
+  .fee-summary-actions { min-width: 0; }
+  .checkout-top { flex-direction: column-reverse; gap: var(--space-2); }
+}

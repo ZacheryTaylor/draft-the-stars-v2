@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { billing } from "@/lib/billing/config";
 import { getPaymentProvider } from "@/lib/billing/get-provider";
+import { checkoutQuery, checkoutReturnQuery, isCheckoutMode, selectionFor, type CheckoutMode } from "@/lib/billing/checkout-flow";
 import { getData, DataError } from "@/lib/data";
 import { clearSession, getCurrentUser, setSession } from "@/lib/auth/session";
 import { sendEmail } from "@/lib/services/email";
@@ -81,19 +82,33 @@ async function leagueFor(slug: string) {
 }
 
 /**
- * ONE checkout for one or more slots (quantity x $5): a member's own slot ("mine"), the commissioner's
- * selected slots ("selected", multi-select) or every unpaid slot ("all_unpaid", open slots included).
- * Today the provider is always the mock, which settles instantly.
+ * Step 1 of checkout: validate the selection (a member's own slot "mine", the commissioner's "selected"
+ * slots, or "all_unpaid" incl. open slots), then go to the checkout page (order summary + test card).
  */
 export async function checkoutSlots(form: FormData) {
   const slug = str(form, "slug");
   const path = `/leagues/${slug}/billing`;
   const user = await requireUser(path);
   const { league, teams } = await leagueFor(slug);
-  const mode = str(form, "mode");
-  const selection: string[] | "all_unpaid" =
-    mode === "all_unpaid" ? "all_unpaid" : mode === "mine" ? teams.filter((t) => t.ownerId === user.id).map((t) => t.id) : form.getAll("teamId").map(String);
-  const plan = await run(path, () => getData().planSlotCheckout(user.id, league.id, selection));
+  const mode = isCheckoutMode(str(form, "mode")) ? (str(form, "mode") as CheckoutMode) : "mine";
+  const teamIds = form.getAll("teamId").map(String);
+  await run(path, () => getData().planSlotCheckout(user.id, league.id, selectionFor(mode, teamIds, teams, user.id)));
+  redirect(`/leagues/${slug}/checkout?${checkoutQuery(mode, teamIds)}`);
+}
+
+/**
+ * Step 2: ONE checkout for the planned slots (quantity x the league's per-member fee).
+ * Today the provider is always the mock (simulated test checkout), which settles instantly.
+ */
+export async function confirmCheckout(form: FormData) {
+  const slug = str(form, "slug");
+  const path = `/leagues/${slug}/billing`;
+  const mode = isCheckoutMode(str(form, "mode")) ? (str(form, "mode") as CheckoutMode) : "mine";
+  const teamIds = form.getAll("teamId").map(String);
+  const checkoutPath = `/leagues/${slug}/checkout?${checkoutQuery(mode, teamIds)}`;
+  const user = await requireUser(checkoutPath);
+  const { league, teams } = await leagueFor(slug);
+  const plan = await run(checkoutPath, () => getData().planSlotCheckout(user.id, league.id, selectionFor(mode, teamIds, teams, user.id)));
   const provider = getPaymentProvider();
   const result = await provider.createCheckout({
     leagueId: league.id,
@@ -103,18 +118,18 @@ export async function checkoutSlots(form: FormData) {
     quantity: plan.quantity,
     amountCents: plan.amountCents,
     currency: billing.currency,
-    successUrl: `${path}?paid=${plan.quantity}`,
-    cancelUrl: path,
+    successUrl: `${path}?${checkoutReturnQuery("success", plan.quantity)}`,
+    cancelUrl: `${path}?${checkoutReturnQuery("cancelled")}`,
   });
   if (result.kind === "redirect") redirect(result.url);
-  if (result.kind === "unavailable") back(path, result.reason);
+  if (result.kind === "unavailable") back(checkoutPath, result.reason);
   if (result.kind === "paid") {
-    await run(path, () =>
+    await run(checkoutPath, () =>
       getData().markSlotsPaid({ leagueId: league.id, teamIds: plan.teamIds, payerId: user.id, provider: provider.id, checkoutId: result.providerPaymentId, providerPaymentId: result.providerPaymentId }),
     );
   }
   revalidatePath(`/leagues/${slug}`, "layout");
-  redirect(`${path}?paid=${plan.quantity}`);
+  redirect(`${path}?${checkoutReturnQuery("success", plan.quantity)}`);
 }
 
 export async function remindUnpaid(form: FormData) {

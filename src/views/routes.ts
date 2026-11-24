@@ -16,6 +16,8 @@ export interface Routes {
   newLeague: string;
   settings: string;
   league: (slug: string, tab?: LeagueTab, query?: string) => string;
+  /** Checkout step for league fees (order summary + simulated test card while no payment keys are set). */
+  checkout: (slug: string, query?: string) => string;
   /** Legal pages: /terms, /privacy, /refunds, /fees-disclosure, /contact. */
   legal: (slug: LegalSlug) => string;
 }
@@ -31,6 +33,7 @@ export const serverRoutes: Routes = {
   newLeague: "/leagues/new",
   settings: "/settings",
   league: (slug, tab, query) => `/leagues/${slug}${tab === "draft" ? "/draft" : tab === "commissioner" ? "/commissioner" : tab === "fees" ? "/billing" : ""}${q(query)}`,
+  checkout: (slug, query) => `/leagues/${slug}/checkout${q(query)}`,
   legal: (slug) => `/${slug}`,
 };
 
@@ -44,5 +47,6 @@ export const demoRoutes: Routes = {
   newLeague: "/leagues/new/",
   settings: "/settings/",
   league: (slug, tab, query) => `/league/${tab && tab !== "standings" ? `${tab}/` : ""}?slug=${encodeURIComponent(slug)}${query ? `&${query}` : ""}`,
+  checkout: (slug, query) => `/league/checkout/?slug=${encodeURIComponent(slug)}${query ? `&${query}` : ""}`,
   legal: (slug) => `/${slug}/`,
 };

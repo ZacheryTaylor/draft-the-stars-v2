@@ -14,13 +14,36 @@ export interface FeesActions {
   requestRefund: (form: FormData) => Promise<void>;
   removeMember: (form: FormData) => Promise<void>;
 }
-export interface FeesFlash { error?: string; paid?: string; new?: string; saved?: string }
+export interface FeesFlash { error?: string; paid?: string; new?: string; saved?: string; checkout?: string }
 
 const SAVED: Record<string, string> = {
   reminder: "Reminder queued (email is a placeholder; nothing was sent).",
   refund: "Refund requested (placeholder). It goes back to whoever paid, and the slot is unpaid again.",
   removed: "Member removed. Their slot is open again; share the invite code to replace them.",
 };
+
+/** Banner after a (test) checkout returns: what was paid, and whether the league is now unlocked for the draft. */
+function CheckoutSuccess({ paid, price, ready, isCommissioner, slug, r }: { paid: number; price: number; ready: ReturnType<typeof draftReadiness>; isCommissioner: boolean; slug: string; r: Routes }) {
+  const open = ready.totalSlots - ready.filledSlots;
+  const allPaid = ready.paidSlots >= ready.totalSlots;
+  return (
+    <div className={`checkout-result notice ${ready.ready ? "ok" : ""}`} role="status" data-testid="checkout-success">
+      <p style={{ margin: 0 }}>
+        <span aria-hidden="true" className="checkout-check">✓</span> <b>Payment complete (test).</b> {paid} slot{paid === 1 ? "" : "s"} paid · {formatCents(paid * price)}. No money moved.
+      </p>
+      {ready.ready ? (
+        <div className="row" style={{ marginTop: 8 }}>
+          <span><b>League unlocked.</b> Every slot is filled and paid, so the draft can start.</span>
+          <Link className="btn primary btn-sm" href={r.league(slug, "draft")} data-testid="go-draft">{isCommissioner ? "Start the draft" : "Go to the draft room"}</Link>
+        </div>
+      ) : allPaid ? (
+        <p style={{ margin: "8px 0 0" }}><b>Fees: all paid.</b> The draft unlocks once {open === 1 ? "the last open slot has" : `the ${open} open slots have`} a member. {isCommissioner && <Link href={r.league(slug, "commissioner")}>Share the invite code</Link>}</p>
+      ) : (
+        <p style={{ margin: "8px 0 0" }}>Draft waiting: {ready.reasons.join("; ")}.</p>
+      )}
+    </div>
+  );
+}
 
 function RefundNote({ r }: { r: Routes }) {
   return (
@@ -63,6 +86,7 @@ export function FeesView({ b, user, slug, sp, act, stripeLabel, mockLabel, r }: 
   const history = b.payments.filter((p) => p.status !== "unpaid" && p.status !== "waived").sort((x, y) => (y.paidAt ?? y.createdAt).localeCompare(x.paidAt ?? x.createdAt));
   const teamName = (id: string) => b.teams.find((t) => t.id === id)?.name ?? "Team";
   const unpaidMembers = rows.filter((r) => r.status === "unpaid" && r.memberId).length;
+  const unpaidSlots = rows.filter((r) => r.status === "unpaid").length;
 
   return (
     <>
@@ -75,8 +99,41 @@ export function FeesView({ b, user, slug, sp, act, stripeLabel, mockLabel, r }: 
           </div>
           <span className={`pill ${ready.ready ? "pill-ok" : "pill-gold"}`} style={{ fontSize: 13 }}>{ready.ready ? "Ready to draft" : "Draft waiting"}</span>
         </div>
-        {sp.new && <p className="notice">League created for free. Invite your members: each pays their own {formatCents(price)}, or you can cover some or all of them below.</p>}
-        {sp.paid && <p className="notice" role="status">Mock payment succeeded for {sp.paid} slot{sp.paid === "1" ? "" : "s"} ({formatCents(Number(sp.paid) * price)}). No money moved.</p>}
+        {sp.checkout === "success" || sp.paid ? (
+          <CheckoutSuccess paid={Number(sp.paid) || 0} price={price} ready={ready} isCommissioner={v.isCommissioner} slug={slug} r={r} />
+        ) : sp.checkout === "cancelled" ? (
+          <p className="notice checkout-result" role="status" data-testid="checkout-cancelled"><b>Checkout cancelled.</b> Nothing was charged and your slots are still unpaid. You can check out again any time before the draft.</p>
+        ) : null}
+        {(sp.new || (v.isCommissioner && ready.paidSlots === 0)) && !sp.checkout && !locked && (
+          <div className="fee-summary" data-testid="fee-summary">
+            <div>
+              <p className="eyebrow" style={{ margin: 0 }}>{sp.new ? "League created · free" : "Pay for the league"}</p>
+              <h3 style={{ margin: "2px 0 4px" }}>Fee summary</h3>
+              <div className="receipt">
+                <div><span>Team slots</span><b>{ready.totalSlots}</b></div>
+                <div><span>Platform fee per member (one-time)</span><b>{formatCents(price)}</b></div>
+                <div className="total"><span>League total if you cover everyone</span><span>{formatCents(price * ready.totalSlots)}</span></div>
+              </div>
+              <p className="hint">Each member can pay their own {formatCents(price)} when they join, or you can pay for the whole league now. Open slots you pay for stay paid for whoever claims them.</p>
+            </div>
+            {v.isCommissioner && !locked && (
+              <div className="fee-summary-actions">
+                <form action={act.checkoutSlots}>
+                  <input type="hidden" name="slug" value={slug} />
+                  <input type="hidden" name="mode" value="all_unpaid" />
+                  <button type="submit" className="primary" data-testid="cover-league">Pay for the league · {formatCents(price * unpaidSlots)}</button>
+                </form>
+                {mine?.status === "unpaid" && (
+                  <form action={act.checkoutSlots}>
+                    <input type="hidden" name="slug" value={slug} />
+                    <input type="hidden" name="mode" value="mine" />
+                    <button type="submit">Just my slot · {formatCents(price)}</button>
+                  </form>
+                )}
+              </div>
+            )}
+          </div>
+        )}
         <FormMessage error={sp.error} success={sp.saved ? SAVED[sp.saved] : undefined} />
 
         <div className="grid-2">
@@ -92,7 +149,7 @@ export function FeesView({ b, user, slug, sp, act, stripeLabel, mockLabel, r }: 
                   <div><span>{mine.teamName}</span><b>1 slot</b></div>
                   <div className="total"><span>Total</span><span>{formatCents(price)}</span></div>
                 </div>
-                <button type="submit" className="primary" disabled={locked}>Pay my {formatCents(price)} with mock checkout</button>
+                <button type="submit" className="primary" disabled={locked}>Continue to checkout · {formatCents(price)}</button>
                 <RefundNote r={r} />
               </form>
             ) : (
@@ -104,7 +161,7 @@ export function FeesView({ b, user, slug, sp, act, stripeLabel, mockLabel, r }: 
           <div className="stack">
             <p className="notice warn">
               <b>Payment provider not connected.</b> {stripeLabel} is a placeholder (no keys, no account), so no real card can be charged.
-              Checkout uses the <b>{mockLabel}</b>; it succeeds instantly and is the only way a slot becomes paid right now.
+              Checkout opens a <b>simulated test checkout</b> ({mockLabel}); paying there is the only way a slot becomes paid right now.
             </p>
             <div>
               <b>Draft gate</b>

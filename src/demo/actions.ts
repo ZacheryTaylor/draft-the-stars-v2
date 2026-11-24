@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import { billing } from "@/lib/billing/config";
 import { getPaymentProvider } from "@/lib/billing/get-provider";
+import { checkoutQuery, checkoutReturnQuery, isCheckoutMode, selectionFor, type CheckoutMode } from "@/lib/billing/checkout-flow";
 import { DataError } from "@/lib/data/adapter";
 import { isThemeId, THEME_STORAGE_KEY, type ThemeId } from "@/lib/themes/presets";
 import type { MemberRole } from "@/lib/data/types";
@@ -95,17 +96,27 @@ export function useDemoActions(page: string) {
       router.push(r.league(l.slug));
     }),
     // league actions (stay on the page)
+    // Checkout step 1: validate, then open the checkout page (order summary + simulated test card).
     checkoutSlots: run(async (f) => {
       const uid = me();
       const b = leagueId(str(f, "slug"));
-      const mode = str(f, "mode");
-      const selection = mode === "all_unpaid" ? "all_unpaid" : mode === "mine" ? b.teams.filter((t) => t.ownerId === uid).map((t) => t.id) : f.getAll("teamId").map(String);
-      const plan = await demoData.planSlotCheckout(uid, b.league.id, selection);
+      const mode = isCheckoutMode(str(f, "mode")) ? (str(f, "mode") as CheckoutMode) : "mine";
+      const teamIds = f.getAll("teamId").map(String);
+      await demoData.planSlotCheckout(uid, b.league.id, selectionFor(mode, teamIds, b.teams, uid));
+      router.push(r.checkout(b.league.slug, checkoutQuery(mode, teamIds)));
+    }),
+    // Checkout step 2: "Pay (test)" settles through the mock provider, then back to fees with ?checkout=success.
+    confirmCheckout: run(async (f) => {
+      const uid = me();
+      const b = leagueId(str(f, "slug"));
+      const mode = isCheckoutMode(str(f, "mode")) ? (str(f, "mode") as CheckoutMode) : "mine";
+      const plan = await demoData.planSlotCheckout(uid, b.league.id, selectionFor(mode, f.getAll("teamId").map(String), b.teams, uid));
       const provider = getPaymentProvider();
       const res = await provider.createCheckout({ leagueId: b.league.id, leagueName: b.league.name, payerId: uid, teamIds: plan.teamIds, quantity: plan.quantity, amountCents: plan.amountCents, currency: billing.currency, successUrl: "", cancelUrl: "" });
       if (res.kind !== "paid") throw new DataError(res.kind === "unavailable" ? res.reason : "Checkout unavailable in the demo");
       await demoData.markSlotsPaid({ leagueId: b.league.id, teamIds: plan.teamIds, payerId: uid, provider: provider.id, checkoutId: res.providerPaymentId, providerPaymentId: res.providerPaymentId });
-      setFlash({ page, paid: String(plan.quantity) });
+      commit();
+      router.push(r.league(b.league.slug, "fees", checkoutReturnQuery("success", plan.quantity)));
     }),
     remindUnpaid: run(async (f) => {
       await demoData.remindUnpaid(me(), leagueId(str(f, "slug")).league.id, str(f, "teamId"));
